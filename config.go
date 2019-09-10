@@ -23,6 +23,12 @@ type config struct {
 		AuthUser    string `json:"auth_user"`
 		AuthPass    string `json:"auth_pass"`
 	} `json:"node"`
+	Wallet struct {
+		Address      string `json:"address"`
+		OwnerAPIPort int    `json:"owner_api_port"`
+		AuthUser     string `json:"auth_user"`
+		AuthPass     string `json:"auth_pass"`
+	} `json:"wallet"`
 }
 
 func parseConfig() *config {

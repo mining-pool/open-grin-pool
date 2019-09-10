@@ -110,7 +110,8 @@ func (ss *stratumServer) handle(conn net.Conn) {
 			}
 
 			err = ss.db.Update(func(txn *badger.Txn) error {
-				err = txn.Set([]byte("status"+login), status)
+				e := badger.NewEntry([]byte("status"+login), status).WithTTL(time.Hour)
+				err := txn.SetEntry(e)
 				return err
 			})
 			if err != nil {
@@ -275,7 +276,8 @@ func (ss *stratumServer) handle(conn net.Conn) {
 			lastShareCount++
 
 			err = ss.db.Update(func(txn *badger.Txn) error {
-				err = txn.Set([]byte("shares+"+login), new(big.Int).SetUint64(lastShareCount).Bytes())
+				e := badger.NewEntry([]byte("shares+"+login), new(big.Int).SetUint64(lastShareCount).Bytes()).WithTTL(time.Hour)
+				err := txn.SetEntry(e)
 				return err
 			})
 			if err != nil {
@@ -305,7 +307,7 @@ func relay2Node(nc *nodeClient, data json.RawMessage) {
 
 func initStratumServer(db *badger.DB, conf *config) {
 	ln, err := net.Listen("tcp",
-		conf.StratumServer.Address+strconv.Itoa(conf.StratumServer.Port),
+		conf.StratumServer.Address+":"+strconv.Itoa(conf.StratumServer.Port),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -314,8 +316,9 @@ func initStratumServer(db *badger.DB, conf *config) {
 	log.Println("listening on ", conf.StratumServer.Port)
 
 	ss := &stratumServer{
-		db: db,
-		ln: ln,
+		db:   db,
+		ln:   ln,
+		conf: conf,
 	}
 
 	go ss.backupPerInterval()

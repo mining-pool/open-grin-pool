@@ -28,9 +28,13 @@ vi config.json
 
 ```
 
+WebAPI:
+- `/pool` pool status
+- `/revenue` the revenue today
+- `/miner/{miner_login}` GET is the miner status, POST upload the payment method
+
 ### TODO
 - Web UI
 - payment
 - more accurate hashrate
-- revenue calculator
 - more

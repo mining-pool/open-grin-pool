@@ -18,10 +18,30 @@ type apiServer struct {
 	conf   *config
 }
 
-func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
+func (as *apiServer) revenueHandler(w http.ResponseWriter, r *http.Request) {
+	var raw []byte
 
+	err := as.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte("revenue"))
+		if err != nil {
+			return err
+		}
+		raw, err = item.ValueCopy(nil)
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
+	header := w.Header()
+	header.Set("Content-Type", "application/json")
+	_, _ = w.Write(raw)
+}
+
+func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 	var blockBatch []string
-	err := as.db.Update(func(txn *badger.Txn) error {
+
+	err := as.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte("blocks"))
 		if err != nil {
 			return err
@@ -41,6 +61,7 @@ func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 	req.SetBasicAuth(as.conf.Node.AuthUser, as.conf.Node.AuthPass)
 	client := &http.Client{}
 	res, _ := client.Do(req)
+
 	dec := json.NewDecoder(res.Body)
 	var nodeStatus interface{}
 	_ = dec.Decode(&nodeStatus)
@@ -208,10 +229,11 @@ func initAPIServer(db *badger.DB, conf *config) {
 	})
 
 	r := mux.NewRouter()
+	r.HandleFunc("/revenue", as.revenueHandler)
 	r.HandleFunc("/pool", as.poolHandler)
 	r.HandleFunc("/miner/{miner_login}", as.minerHandler)
 	http.Handle("/", r)
-	go log.Fatal(http.ListenAndServe(conf.APIServer.Address+strconv.Itoa(conf.APIServer.Port),
+	go log.Fatal(http.ListenAndServe(conf.APIServer.Address+":"+strconv.Itoa(conf.APIServer.Port),
 		nil,
 	),
 	)
