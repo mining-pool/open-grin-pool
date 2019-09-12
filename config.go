@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"os"
 )
 
@@ -13,9 +12,17 @@ type config struct {
 		BackupInterval string `json:"backup_interval"`
 	} `json:"stratum_server"`
 	APIServer struct {
-		Address string `json:"address"`
-		Port    int    `json:"port"`
+		Address  string `json:"address"`
+		Port     int    `json:"port"`
+		AuthUser string `json:"auth_user"`
+		AuthPass string `json:"auth_pass"`
 	} `json:"api_server"`
+	Storage struct {
+		Address  string `json:"address"`
+		Port     int    `json:"port"`
+		DB       int    `json:"db"`
+		Password string `json:"password"`
+	} `json:"storage"`
 	Node struct {
 		Address     string `json:"address"`
 		APIPort     int    `json:"api_port"`

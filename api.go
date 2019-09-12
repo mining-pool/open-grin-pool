@@ -2,17 +2,16 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/dgraph-io/badger"
-	"github.com/gorilla/mux"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type apiServer struct {
-	db     *badger.DB
+	db     *database
 	nc     *nodeClient
 	height uint64
 	conf   *config
@@ -21,17 +20,8 @@ type apiServer struct {
 func (as *apiServer) revenueHandler(w http.ResponseWriter, r *http.Request) {
 	var raw []byte
 
-	err := as.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte("revenue"))
-		if err != nil {
-			return err
-		}
-		raw, err = item.ValueCopy(nil)
-		return nil
-	})
-	if err != nil {
-		log.Println(err)
-	}
+	table := as.db.getLastDayRevenue()
+	raw, _ = json.Marshal(table)
 
 	header := w.Header()
 	header.Set("Content-Type", "application/json")
@@ -41,21 +31,7 @@ func (as *apiServer) revenueHandler(w http.ResponseWriter, r *http.Request) {
 func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 	var blockBatch []string
 
-	err := as.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte("blocks"))
-		if err != nil {
-			return err
-		}
-		raw, err := item.ValueCopy(nil)
-		err = json.Unmarshal(raw, &blockBatch)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		log.Println(err)
-	}
+	blockBatch = as.db.getAllBlockHashes()
 
 	req, _ := http.NewRequest("GET", "http://"+as.conf.Node.Address+":"+strconv.Itoa(as.conf.Node.APIPort)+"/v1/status", nil)
 	req.SetBasicAuth(as.conf.Node.AuthUser, as.conf.Node.AuthPass)
@@ -68,12 +44,11 @@ func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 
 	table := map[string]interface{}{
 		"node_status":  nodeStatus,
-		"height":       as.height,
 		"mined_blocks": blockBatch,
 	}
 	raw, err := json.Marshal(table)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 
@@ -87,11 +62,6 @@ type registerPaymentMethodForm struct {
 	PaymentMethod string `json:"pm"`
 }
 
-type apiResponse struct {
-	Code   int    `json:"code"`
-	Detail string `json:"detail"`
-}
-
 func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 	header := w.Header()
 	header.Set("Content-Type", "application/json")
@@ -102,84 +72,28 @@ func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		raw, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			log.Println(err)
+			log.Error(err)
 			return
 		}
 		var form registerPaymentMethodForm
 		err = json.Unmarshal(raw, &form)
 		if err != nil {
-			log.Println(err)
+			log.Error(err)
 			return
 		}
 
-		var isCorrect = false
-		err = as.db.View(func(txn *badger.Txn) error {
-			item, err := txn.Get([]byte(login + "login"))
-			if err != nil {
-				if err == badger.ErrKeyNotFound {
-					return nil
-				}
-				return err
-			}
-
-			passInDB, err := item.ValueCopy(nil)
-			if err != nil {
-				return err
-			}
-			if string(passInDB) != form.Pass {
-				return errWrongPassword
-			} else {
-				isCorrect = true
-			}
-
-			return nil
-		})
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		if isCorrect {
-			err := as.db.Update(func(txn *badger.Txn) error {
-				err = txn.Set([]byte(login+"payment"), []byte(form.PaymentMethod))
-				return err
-			})
-			if err != nil {
-				login = ""
-				log.Println(err)
-			}
+		if as.db.verifyMiner(login, form.Pass) == correctPassword {
+			as.db.updatePayment(login, form.PaymentMethod)
+			w.Write([]byte("{'status':'ok'}"))
+		} else {
+			w.Write([]byte("{'status':'failed'}"))
 		}
 
 		return
 	}
 
 	if r.Method == "GET" {
-		err := as.db.View(func(txn *badger.Txn) error {
-			item, err := txn.Get([]byte(login + "+status"))
-			if err != nil {
-				return err
-			}
-			raw, err := item.ValueCopy(nil)
-			if err != nil {
-				return err
-			}
-			//raw, err := json.Marshal(res)
-			//if err != nil {
-			//	return err
-			//}
-			_, _ = w.Write(raw)
-			return nil
-		})
-		if err != nil {
-			res := map[string]string{
-				"error": "no such login",
-			}
-			raw, err := json.Marshal(res)
-			if err != nil {
-				log.Println(err)
-			}
-			_, _ = w.Write(raw)
-		}
+		as.db.getMinerStatus(login)
 	}
 
 }
@@ -200,13 +114,13 @@ func (as *apiServer) loopHeight() {
 		case <-ch:
 			err := enc.Encode(statusReq)
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 		}
 	}
 }
 
-func initAPIServer(db *badger.DB, conf *config) {
+func initAPIServer(db *database, conf *config) {
 	nc := initNodeStratumClient(conf)
 	as := &apiServer{
 		db:   db,
@@ -216,11 +130,11 @@ func initAPIServer(db *badger.DB, conf *config) {
 
 	go as.loopHeight()
 
-	go as.nc.wait(func(sr json.RawMessage) {
+	go as.nc.registerHandler(func(sr json.RawMessage) {
 		var statusRes stratumResponse
 		err := json.Unmarshal(sr, &statusRes)
 		if err != nil {
-			log.Println(err)
+			log.Error(err)
 		}
 		if statusRes.Method == "status" {
 			result, _ := statusRes.Result.(map[string]interface{})
