@@ -177,11 +177,11 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			go relay2Node(nc, jsonRaw)
 			break
 
-		case "submit": // migrate to the resp handler
-		case "getjobtemplate":
-		case "job":
-		case "keepalive":
-		case "height":
+		//case "submit": // migrate to the resp handler
+		//case "getjobtemplate":
+		//case "job":
+		//case "keepalive":
+		//case "height":
 		default:
 			if !session.hasLoggedIn() {
 				logger.Warning(login, " has not logged in")
