@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stratumServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/stratumServer.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -63,15 +63,6 @@
     </option>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
-      <module name="SimplistPool" />
-      <working_directory value="$PROJECT_DIR$/" />
-      <go_parameters value="-i" />
-      <kind value="FILE" />
-      <filePath value="$PROJECT_DIR$/" />
-      <directory value="$PROJECT_DIR$/" />
-      <method v="2" />
-    </configuration>
     <configuration name="go build github.com/maoxs2/pool" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="SimplistPool" />
       <working_directory value="$PROJECT_DIR$" />
@@ -79,16 +70,6 @@
       <filePath value="$PROJECT_DIR$/main.go" />
       <package value="github.com/maoxs2/pool" />
       <directory value="$PROJECT_DIR$/" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
-      <module name="SimplistPool" />
-      <working_directory value="$PROJECT_DIR$/" />
-      <go_parameters value="-i" />
-      <framework value="gotest" />
-      <kind value="DIRECTORY" />
-      <directory value="$PROJECT_DIR$/" />
-      <filePath value="$PROJECT_DIR$/" />
       <method v="2" />
     </configuration>
     <recent_temporary>
@@ -132,7 +113,8 @@
     <MESSAGE value="[add]handleMethod" />
     <MESSAGE value="[update]note in readme" />
     <MESSAGE value="[update&amp;bugFix]provide more toleration for miner who have not login, in which can get rid of some potential bugs" />
-    <option name="LAST_COMMIT_MESSAGE" value="[update&amp;bugFix]provide more toleration for miner who have not login, in which can get rid of some potential bugs" />
+    <MESSAGE value="[update] update the readme.md" />
+    <option name="LAST_COMMIT_MESSAGE" value="[update] update the readme.md" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
