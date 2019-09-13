@@ -164,16 +164,16 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 			switch ss.db.verifyMiner(login, pass) {
 			case wrongPassword:
-				logger.Warning(login, "has failed to login")
+				logger.Warning(login, " has failed to login")
 				return
 			case noPassword:
 				ss.db.registerMiner(login, pass, "")
-				logger.Warning(login, "has registered")
+				logger.Warning(login, " has registered")
 			case correctPassword:
 			}
 
 			session.login = login
-			logger.Info(session.login, "has logged in")
+			logger.Info(session.login, " has logged in")
 			go relay2Node(nc, jsonRaw)
 			break
 
@@ -184,8 +184,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		case "height":
 		default:
 			if !session.hasLoggedIn() {
-				logger.Warning(login, "has not logged in")
-				return
+				logger.Warning(login, " has not logged in")
 			}
 
 			go relay2Node(nc, jsonRaw)
