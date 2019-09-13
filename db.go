@@ -17,7 +17,7 @@ func initDB(config *config) *database {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.Storage.Address + ":" + strconv.Itoa(config.Storage.Port),
 		Password: config.Storage.Password,
-		DB:       config.Storage.DB,
+		DB:       config.Storage.Db,
 	})
 
 	_, err := rdb.Ping().Result()
