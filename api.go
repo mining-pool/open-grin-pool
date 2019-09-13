@@ -71,22 +71,23 @@ type registerPaymentMethodForm struct {
 }
 
 func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
+	var raw []byte
+
 	header := w.Header()
 	header.Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
 	login := vars["miner_login"]
 
-	var raw []byte
 	switch r.Method {
 	case "POST":
-		raw, err := ioutil.ReadAll(r.Body)
+		rawBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Error(err)
 			return
 		}
 		var form registerPaymentMethodForm
-		err = json.Unmarshal(raw, &form)
+		err = json.Unmarshal(rawBody, &form)
 		if err != nil {
 			log.Error(err)
 			return
@@ -99,10 +100,15 @@ func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 			raw = []byte("{'status':'failed'}")
 		}
 
-		return
-	default:
+		break
+	default: // GET
+		var err error
 		m := as.db.getMinerStatus(login)
-		raw, _ = json.Marshal(m)
+		raw, err = json.Marshal(m)
+		if err != nil {
+			log.Error(err)
+			return
+		}
 	}
 
 	_, _ = w.Write(raw)
@@ -120,8 +126,6 @@ func initAPIServer(db *database, conf *config) {
 	r.HandleFunc("/revenue", as.revenueHandler)
 	r.HandleFunc("/shares", as.sharesHandler)
 	http.Handle("/", r)
-	go log.Fatal(http.ListenAndServe(conf.APIServer.Address+":"+strconv.Itoa(conf.APIServer.Port),
-		nil,
-	),
-	)
+	go log.Fatal(
+		http.ListenAndServe(conf.APIServer.Address+":"+strconv.Itoa(conf.APIServer.Port), nil))
 }

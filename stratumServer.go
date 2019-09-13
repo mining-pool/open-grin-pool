@@ -99,7 +99,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		case "submit":
 			ss.db.putShare(mc.login, mc.difficulty)
 			if res.Error != nil {
-				log.Info(login, "'s share has err:", res.Error)
+				log.Warning(login, "'s share has err:", res.Error)
 				break
 			}
 			detail, ok := res.Result.(string)

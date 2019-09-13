@@ -30,7 +30,7 @@ vi config.json
 
 WebAPI:
 - `/pool` basic pool status
-- `/lastday_revenue` the revenue **last day**, which the pool maintainer has to sent **today**
+- `/revenue` the revenue **last day**, which the pool maintainer has to sent **today**
 - `/shares` the all miners' shares **today**
 - `/miner/{miner_login}` GET is the miner status
 POST upload the payment method. e.g. ` curl 127.0.0.1:3333/miner/Hello` will get the json of "Hello"'s status. `curl  -X POST -d "{'pass': 'passwordOfHello', 'pm': 'http://<IP>:<PORT>'}" 127.0.0.1:3333/miner/Hello`
