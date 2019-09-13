@@ -1,11 +1,16 @@
 package main
 
-import "github.com/op/go-logging"
+import (
+	"os"
 
-var log = logging.MustGetLogger("pool")
+	"github.com/google/logger"
+)
+
+var conf = parseConfig()
+var logFile, _ = os.Create(conf.Log.LogFile)
+var log = logger.Init("pool", conf.Log.Verbose, conf.Log.SystemLog, logFile)
 
 func main() {
-	conf := parseConfig()
 	db := initDB(conf)
 
 	p := &payer{}

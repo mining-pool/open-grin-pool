@@ -13,7 +13,7 @@ type nodeClient struct {
 func initNodeStratumClient(conf *config) *nodeClient {
 	conn, err := net.Dial("tcp4", conf.Node.Address+":"+strconv.Itoa(conf.Node.StratumPort))
 	if err != nil {
-		log.Panic(err)
+		log.Error(err)
 	}
 
 	nc := &nodeClient{

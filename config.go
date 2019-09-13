@@ -6,6 +6,11 @@ import (
 )
 
 type config struct {
+	Log struct {
+		Verbose   bool   `json:"verbose"`
+		SystemLog bool   `json:"system_log"`
+		LogFile   string `json:"log_file"`
+	} `json:"log"`
 	StratumServer struct {
 		Address        string `json:"address"`
 		Port           int    `json:"port"`
@@ -20,7 +25,7 @@ type config struct {
 	Storage struct {
 		Address  string `json:"address"`
 		Port     int    `json:"port"`
-		DB       int    `json:"db"`
+		Db       int    `json:"db"`
 		Password string `json:"password"`
 	} `json:"storage"`
 	Node struct {
