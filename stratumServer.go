@@ -33,14 +33,45 @@ type stratumResponse struct {
 	Error   map[string]interface{} `json:"error"`
 }
 
-type minerConn struct {
+type minerSession struct {
 	login      string
 	difficulty int64
 	ctx        context.Context
 }
 
-func (mc *minerConn) hasLoggedIn() bool {
-	return mc.login == ""
+func (ms *minerSession) hasLoggedIn() bool {
+	return ms.login == ""
+}
+
+func (ms *minerSession) handleMethod(res *stratumResponse, db *database) {
+	switch res.Method {
+	case "status":
+		if ms.login == "" {
+			logger.Warning("recv status detail before login")
+			break
+		}
+		result, _ := res.Result.(map[string]interface{})
+		db.setMinerStatus(ms.login, result)
+		ms.difficulty, _ = result["difficulty"].(int64)
+
+		break
+	case "submit":
+		db.putShare(ms.login, ms.difficulty)
+		if res.Error != nil {
+			logger.Warning(ms.login, "'s share has err:", res.Error)
+			break
+		}
+		detail, ok := res.Result.(string)
+		logger.Info(ms.login, "has submit a", detail, "share")
+		if ok {
+			if strings.Contains(detail, "block - ") {
+				blockHash := strings.Trim(detail, "block - ")
+				db.putBlockHash(blockHash)
+				logger.Warning("block", blockHash, "has been found by", ms.login)
+			}
+		}
+		break
+	}
 }
 
 func callStatusPerInterval(ctx context.Context, nc *nodeClient) {
@@ -68,13 +99,13 @@ func callStatusPerInterval(ctx context.Context, nc *nodeClient) {
 }
 
 func (ss *stratumServer) handleConn(conn net.Conn) {
-	mc := &minerConn{difficulty: 1}
+	logger.Info("new conn from ", conn.RemoteAddr())
+	session := &minerSession{difficulty: 1}
 	defer conn.Close()
 	var login string
 	nc := initNodeStratumClient(ss.conf)
 
 	ctx, cancel := context.WithCancel(context.Background())
-
 	defer cancel()
 
 	go callStatusPerInterval(ctx, nc)
@@ -90,34 +121,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		var res stratumResponse
 		_ = json.Unmarshal(sr, &res) // suppress the err
 
-		switch res.Method {
-		case "status":
-			if mc.login == "" {
-				logger.Warning("recv status detail before login")
-				break
-			}
-			result, _ := res.Result.(map[string]interface{})
-			ss.db.setMinerStatus(mc.login, result)
-			mc.difficulty, _ = result["difficulty"].(int64)
-
-			break
-		case "submit":
-			ss.db.putShare(mc.login, mc.difficulty)
-			if res.Error != nil {
-				logger.Warning(login, "'s share has err:", res.Error)
-				break
-			}
-			detail, ok := res.Result.(string)
-			logger.Info(login, "has submit a", detail, "share")
-			if ok {
-				if strings.Contains(detail, "block - ") {
-					blockHash := strings.Trim(detail, "block - ")
-					ss.db.putBlockHash(blockHash)
-					logger.Warning("block", blockHash, "has been found by", mc.login)
-				}
-			}
-			break
-		}
+		session.handleMethod(&res, ss.db)
 	})
 	defer nc.close()
 
@@ -137,6 +141,8 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			logger.Error(err)
 			return
 		}
+
+		logger.Info(conn.RemoteAddr(), " sends a ", clientReq.Method, " request:", string(jsonRaw))
 
 		switch clientReq.Method {
 		case "login":
@@ -166,8 +172,8 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			case correctPassword:
 			}
 
-			mc.login = login
-			logger.Info(mc.login, "has logged in")
+			session.login = login
+			logger.Info(session.login, "has logged in")
 			go relay2Node(nc, jsonRaw)
 			break
 
@@ -177,7 +183,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		case "keepalive":
 		case "height":
 		default:
-			if !mc.hasLoggedIn() {
+			if !session.hasLoggedIn() {
 				logger.Warning(login, "has not logged in")
 				return
 			}
@@ -218,7 +224,7 @@ func initStratumServer(db *database, conf *config) {
 		if err != nil {
 			logger.Error(err)
 		}
-		logger.Info("new conn from", conn.RemoteAddr())
+
 		go ss.handleConn(conn)
 	}
 }
