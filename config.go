@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/google/logger"
 )
 
 type config struct {
@@ -46,14 +48,14 @@ type config struct {
 func parseConfig() *config {
 	f, err := os.Open("config.json")
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	var conf config
 	dec := json.NewDecoder(f)
 	err = dec.Decode(&conf)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	return &conf

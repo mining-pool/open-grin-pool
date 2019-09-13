@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/logger"
 )
 
 type stratumServer struct {
@@ -67,7 +69,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			case <-ch:
 				err := enc.Encode(statusReq)
 				if err != nil {
-					log.Error(err)
+					logger.Error(err)
 				}
 			case <-ctx.Done():
 				return
@@ -79,7 +81,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		enc := json.NewEncoder(conn)
 		err := enc.Encode(sr)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 		}
 
 		// internal record
@@ -99,11 +101,11 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		case "submit":
 			ss.db.putShare(mc.login, mc.difficulty)
 			if res.Error != nil {
-				log.Warning(login, "'s share has err:", res.Error)
+				logger.Warning(login, "'s share has err:", res.Error)
 				break
 			}
 			detail, ok := res.Result.(string)
-			log.Info(login, "has submit a", detail, "share")
+			logger.Info(login, "has submit a", detail, "share")
 			if ok {
 				if strings.Contains(detail, "block - ") {
 					blockHash := strings.Trim(detail, "block - ")
@@ -122,13 +124,13 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 		err := dec.Decode(&jsonRaw)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			return
 		}
 
 		err = json.Unmarshal(jsonRaw, &clientReq)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			return
 		}
 
@@ -137,13 +139,13 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			var ok bool
 			login, ok = clientReq.Params["login"].(string)
 			if !ok {
-				log.Error("login module broken")
+				logger.Error("login module broken")
 				return
 			}
 
 			pass, ok := clientReq.Params["pass"].(string)
 			if !ok {
-				log.Error("login module broken")
+				logger.Error("login module broken")
 				return
 			}
 
@@ -160,7 +162,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 				mc.login = login
 			}
 
-			log.Info(login, "has logged in")
+			logger.Info(login, "has logged in")
 			go relay2Node(nc, jsonRaw)
 			break
 
@@ -184,7 +186,7 @@ func relay2Node(nc *nodeClient, data json.RawMessage) {
 	enc := json.NewEncoder(nc.c)
 	err := enc.Encode(data)
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 }
 
@@ -193,10 +195,10 @@ func initStratumServer(db *database, conf *config) {
 		conf.StratumServer.Address+":"+strconv.Itoa(conf.StratumServer.Port),
 	)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
-	log.Warning("listening on ", conf.StratumServer.Port)
+	logger.Warning("listening on ", conf.StratumServer.Port)
 
 	ss := &stratumServer{
 		db:   db,
@@ -209,9 +211,9 @@ func initStratumServer(db *database, conf *config) {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 		}
-		log.Info("new conn from", conn.RemoteAddr())
+		logger.Info("new conn from", conn.RemoteAddr())
 		go ss.handleConn(conn)
 	}
 }
@@ -220,11 +222,11 @@ func initStratumServer(db *database, conf *config) {
 //func (ss *stratumServer) backupPerInterval() {
 //	d, err := time.ParseDuration(ss.conf.StratumServer.BackupInterval)
 //	if err != nil {
-//		log.Println("failed to start export system", err)
+//		logger.Println("failed to start export system", err)
 //		return
 //	}
 //
-//	log.Println("export system running")
+//	logger.Println("export system running")
 //
 //	ch := time.Tick(d)
 //	for {
@@ -235,7 +237,7 @@ func initStratumServer(db *database, conf *config) {
 //				"-" + strconv.Itoa(time.Now().Hour())
 //			f, err := os.Create(newFileName + ".csv")
 //			if err != nil {
-//				log.Println(err)
+//				logger.Println(err)
 //				continue
 //			}
 //			_ = ss.db.View(func(txn *badger.Txn) error {
@@ -247,7 +249,7 @@ func initStratumServer(db *database, conf *config) {
 //					k := item.Key()
 //					_ = item.Value(func(v []byte) error {
 //						_, err = fmt.Fprintf(f, "%s %d\n", k, new(big.Int).SetBytes(v).Uint64())
-//						log.Println(err)
+//						logger.Println(err)
 //						return nil
 //					})
 //				}

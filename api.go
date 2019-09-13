@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/google/logger"
 	"github.com/gorilla/mux"
 )
 
@@ -56,7 +57,7 @@ func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	raw, err := json.Marshal(table)
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 		return
 	}
 
@@ -83,13 +84,13 @@ func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		rawBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			return
 		}
 		var form registerPaymentMethodForm
 		err = json.Unmarshal(rawBody, &form)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			return
 		}
 
@@ -106,7 +107,7 @@ func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 		m := as.db.getMinerStatus(login)
 		raw, err = json.Marshal(m)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			return
 		}
 	}
@@ -126,6 +127,6 @@ func initAPIServer(db *database, conf *config) {
 	r.HandleFunc("/revenue", as.revenueHandler)
 	r.HandleFunc("/shares", as.sharesHandler)
 	http.Handle("/", r)
-	go log.Fatal(
+	go logger.Fatal(
 		http.ListenAndServe(conf.APIServer.Address+":"+strconv.Itoa(conf.APIServer.Port), nil))
 }

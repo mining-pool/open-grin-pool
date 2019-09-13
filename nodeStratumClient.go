@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net"
 	"strconv"
+
+	"github.com/google/logger"
 )
 
 type nodeClient struct {
@@ -13,7 +15,7 @@ type nodeClient struct {
 func initNodeStratumClient(conf *config) *nodeClient {
 	conn, err := net.Dial("tcp4", conf.Node.Address+":"+strconv.Itoa(conf.Node.StratumPort))
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 
 	nc := &nodeClient{
@@ -33,7 +35,7 @@ func (nc *nodeClient) registerHandler(callback func(sr json.RawMessage)) {
 
 		err := dec.Decode(&sr)
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 			return
 		}
 		go callback(sr)

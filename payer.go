@@ -48,3 +48,13 @@ func (p *payer) watch() {
 		}
 	}()
 }
+
+func initPayer(db *database, conf *config) *payer {
+	p := &payer{
+		db:   db,
+		conf: conf,
+	}
+	p.watch()
+
+	return p
+}
