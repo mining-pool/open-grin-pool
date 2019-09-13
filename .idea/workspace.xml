@@ -3,11 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api.go" beforeDir="false" afterPath="$PROJECT_DIR$/api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/payer.go" beforeDir="false" afterPath="$PROJECT_DIR$/payer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stratumServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/stratumServer.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -125,7 +121,8 @@
     <MESSAGE value="add revenue(payer) func and some bug fix" />
     <MESSAGE value="using redis in replace of badger" />
     <MESSAGE value="[big change]using redis in replace of badger" />
-    <option name="LAST_COMMIT_MESSAGE" value="[big change]using redis in replace of badger" />
+    <MESSAGE value="[bugFix&amp;newApi&amp;clean]add `/shares`, remove some listeners, modified the readme" />
+    <option name="LAST_COMMIT_MESSAGE" value="[bugFix&amp;newApi&amp;clean]add `/shares`, remove some listeners, modified the readme" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

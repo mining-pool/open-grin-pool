@@ -77,7 +77,9 @@ func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	login := vars["miner_login"]
 
-	if r.Method == "POST" {
+	var raw []byte
+	switch r.Method {
+	case "POST":
 		raw, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Error(err)
@@ -92,18 +94,18 @@ func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 
 		if as.db.verifyMiner(login, form.Pass) == correctPassword {
 			as.db.updatePayment(login, form.PaymentMethod)
-			_, _ = w.Write([]byte("{'status':'ok'}"))
+			raw = []byte("{'status':'ok'}")
 		} else {
-			_, _ = w.Write([]byte("{'status':'failed'}"))
+			raw = []byte("{'status':'failed'}")
 		}
 
 		return
+	default:
+		m := as.db.getMinerStatus(login)
+		raw, _ = json.Marshal(m)
 	}
 
-	if r.Method == "GET" {
-		as.db.getMinerStatus(login)
-	}
-
+	_, _ = w.Write(raw)
 }
 
 func initAPIServer(db *database, conf *config) {
