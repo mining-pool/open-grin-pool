@@ -39,7 +39,7 @@ type minerSession struct {
 	ctx        context.Context
 }
 
-func (ms *minerSession) hasLoggedIn() bool {
+func (ms *minerSession) hasNotLoggedIn() bool {
 	return ms.login == ""
 }
 
@@ -183,7 +183,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		//case "keepalive":
 		//case "height":
 		default:
-			if !session.hasLoggedIn() {
+			if session.hasNotLoggedIn() {
 				logger.Warning(login, " has not logged in")
 			}
 
