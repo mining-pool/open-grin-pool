@@ -77,7 +77,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		}
 	}()
 
-	go nc.registerHandler(func(sr json.RawMessage) {
+	go nc.registerHandler(ctx, func(sr json.RawMessage) {
 		enc := json.NewEncoder(conn)
 		err := enc.Encode(sr)
 		if err != nil {
@@ -157,17 +157,16 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 				return
 			case noPassword:
 				ss.db.registerMiner(login, pass, "")
-				break
+				mc.login = login
 			case correctPassword:
 				mc.login = login
 			}
 
-			logger.Info(login, "has logged in")
+			logger.Info(mc.login, "has logged in")
 			go relay2Node(nc, jsonRaw)
 			break
 
 		case "submit": // migrate to the resp handler
-
 		case "getjobtemplate":
 		case "job":
 		case "keepalive":

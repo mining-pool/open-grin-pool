@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"net"
 	"strconv"
@@ -26,18 +27,23 @@ func initNodeStratumClient(conf *config) *nodeClient {
 }
 
 // registerHandler will hook the callback function to the tcp conn, and call func when recv
-func (nc *nodeClient) registerHandler(callback func(sr json.RawMessage)) {
+func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json.RawMessage)) {
 	defer nc.c.Close()
 	dec := json.NewDecoder(nc.c)
 
 	for {
-		var sr json.RawMessage
-
-		err := dec.Decode(&sr)
-		if err != nil {
-			logger.Error(err)
+		select {
+		case <-ctx.Done():
 			return
+		default:
+			var sr json.RawMessage
+
+			err := dec.Decode(&sr)
+			if err != nil {
+				logger.Error(err)
+				return
+			}
+			go callback(sr)
 		}
-		go callback(sr)
 	}
 }
