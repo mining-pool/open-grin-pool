@@ -39,9 +39,25 @@ Maintainer can manually use this command to send the coin `grin wallet send -d h
 
 ### Config
 
-if you are using epic you can keep all default except `auth_pass`. The password can be found in the `.api_secret` file. 
+#### For server
 
+if you are using epic you can keep all default except `auth_pass`. The password can be found in the `.api_secret` file. 
+    
 knowledge about this, check [here](https://github.com/mimblewimble/grin/blob/master/doc/api/api.md)
+
+#### For miner
+
+these 2 param is required
+
+```toml
+# login for the stratum server (if required)
+stratum_server_login = "loginName"
+
+# password for the stratum server (if required)
+stratum_server_password = "loginPass"
+```
+
+**or the miner will cannot connect to the server and the sol will not be relayed to the node!**
 
 ### TODO
 - Web UI
