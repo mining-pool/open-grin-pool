@@ -116,7 +116,7 @@ func (db *database) setMinerStatus(login string, more map[string]interface{}) {
 	}
 }
 
-func (db *database) insertBlockHash(hash string) {
+func (db *database) putBlockHash(hash string) {
 	_, err := db.client.LPush("blocksFound", hash).Result()
 	if err != nil {
 		logger.Error(err)

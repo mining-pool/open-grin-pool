@@ -43,6 +43,30 @@ func (mc *minerConn) hasLoggedIn() bool {
 	return mc.login == ""
 }
 
+func callStatusPerInterval(ctx context.Context, nc *nodeClient) {
+	statusReq := &stratumRequest{
+		ID:      "0",
+		JsonRpc: "2.0",
+		Method:  "status",
+		Params:  nil,
+	}
+
+	ch := time.Tick(10 * time.Second)
+	enc := json.NewEncoder(nc.c)
+
+	for {
+		select {
+		case <-ch:
+			err := enc.Encode(statusReq)
+			if err != nil {
+				logger.Error(err)
+			}
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
 func (ss *stratumServer) handleConn(conn net.Conn) {
 	mc := &minerConn{difficulty: 1}
 	defer conn.Close()
@@ -53,29 +77,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 	defer cancel()
 
-	go func() {
-		statusReq := &stratumRequest{
-			ID:      "0",
-			JsonRpc: "2.0",
-			Method:  "status",
-			Params:  nil,
-		}
-
-		ch := time.Tick(10 * time.Second)
-		enc := json.NewEncoder(nc.c)
-
-		for {
-			select {
-			case <-ch:
-				err := enc.Encode(statusReq)
-				if err != nil {
-					logger.Error(err)
-				}
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
+	go callStatusPerInterval(ctx, nc)
 
 	go nc.registerHandler(ctx, func(sr json.RawMessage) {
 		enc := json.NewEncoder(conn)
@@ -91,6 +93,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		switch res.Method {
 		case "status":
 			if mc.login == "" {
+				logger.Warning("recv status detail before login")
 				break
 			}
 			result, _ := res.Result.(map[string]interface{})
@@ -109,13 +112,14 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			if ok {
 				if strings.Contains(detail, "block - ") {
 					blockHash := strings.Trim(detail, "block - ")
-					ss.db.insertBlockHash(blockHash)
+					ss.db.putBlockHash(blockHash)
+					logger.Warning("block", blockHash, "has been found by", mc.login)
 				}
 			}
 			break
 		}
 	})
-	defer nc.c.Close()
+	defer nc.close()
 
 	dec := json.NewDecoder(conn)
 	for {
@@ -154,14 +158,15 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 			switch ss.db.verifyMiner(login, pass) {
 			case wrongPassword:
+				logger.Warning(login, "has failed to login")
 				return
 			case noPassword:
 				ss.db.registerMiner(login, pass, "")
-				mc.login = login
+				logger.Warning(login, "has registered")
 			case correctPassword:
-				mc.login = login
 			}
 
+			mc.login = login
 			logger.Info(mc.login, "has logged in")
 			go relay2Node(nc, jsonRaw)
 			break
@@ -173,6 +178,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		case "height":
 		default:
 			if !mc.hasLoggedIn() {
+				logger.Warning(login, "has not logged in")
 				return
 			}
 

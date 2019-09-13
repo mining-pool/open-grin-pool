@@ -47,3 +47,7 @@ func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json
 		}
 	}
 }
+
+func (nc *nodeClient) close() {
+	_ = nc.c.Close()
+}
