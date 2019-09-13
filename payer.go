@@ -46,6 +46,5 @@ func (p *payer) watch() {
 				}
 			}
 		}
-
 	}()
 }

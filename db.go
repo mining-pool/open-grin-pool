@@ -15,7 +15,7 @@ type database struct {
 
 func initDB(config *config) *database {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     config.Storage.Address + strconv.Itoa(config.Storage.Port),
+		Addr:     config.Storage.Address + ":" + strconv.Itoa(config.Storage.Port),
 		Password: config.Storage.Password,
 		DB:       config.Storage.DB,
 	})
@@ -73,7 +73,7 @@ func (db *database) updatePayment(login, payment string) {
 	}
 }
 
-func (db *database) writeShare(login string, diff int64) {
+func (db *database) putShare(login string, diff int64) {
 	tx := db.client.TxPipeline()
 	tx.HIncrBy("shares", login, diff)
 	tx.HSet("u+"+login, "lastShare", time.Now().UnixNano())
@@ -83,7 +83,16 @@ func (db *database) writeShare(login string, diff int64) {
 	}
 }
 
-func (db *database) insertMinerStatus(login string, statusTable map[string]interface{}) {
+func (db *database) getShares() map[string]string {
+	shares, err := db.client.HGetAll("shares").Result()
+	if err != nil {
+		log.Error(err)
+	}
+
+	return shares
+}
+
+func (db *database) putMinerStatus(login string, statusTable map[string]interface{}) {
 	_, err := db.client.HMSet("u+"+login, statusTable).Result()
 	if err != nil {
 		log.Error(err)
@@ -141,6 +150,8 @@ func (db *database) calcTodayRevenue(totalRevenue uint64) {
 		totalShare = totalShare + allMinersSharesTable[miner]
 	}
 
+	// clean the share
+	db.client.HDel("share")
 	_, err = fmt.Fprintf(f, "\n")
 
 	allMinersRevenueTable := make(map[string]interface{})

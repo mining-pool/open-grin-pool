@@ -32,8 +32,9 @@ type stratumResponse struct {
 }
 
 type minerConn struct {
-	login string
-	ctx   context.Context
+	login      string
+	difficulty int64
+	ctx        context.Context
 }
 
 func (mc *minerConn) hasLoggedIn() bool {
@@ -41,7 +42,7 @@ func (mc *minerConn) hasLoggedIn() bool {
 }
 
 func (ss *stratumServer) handleConn(conn net.Conn) {
-	mc := &minerConn{}
+	mc := &minerConn{difficulty: 1}
 	defer conn.Close()
 	var login string
 	nc := initNodeStratumClient(ss.conf)
@@ -92,9 +93,11 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			}
 			result, _ := res.Result.(map[string]interface{})
 			ss.db.setMinerStatus(mc.login, result)
+			mc.difficulty, _ = result["difficulty"].(int64)
 
 			break
 		case "submit":
+			ss.db.putShare(mc.login, mc.difficulty)
 			if res.Error != nil {
 				log.Info(login, "'s share has err:", res.Error)
 				break
@@ -162,6 +165,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			break
 
 		case "submit": // migrate to the resp handler
+
 		case "getjobtemplate":
 		case "job":
 		case "keepalive":
