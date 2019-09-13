@@ -3,6 +3,7 @@
 this pool is originally designed for epic (=[epicash](http://epic.tech)). And the codebase of epic is grin so it can be generally used as the grin pool. 
 
 ### features
+- relay the miner conn to the grin node, totally native experience
 - expose the TUI miner detail to http api
 - backup the share(submit) histories per specific time interval
 - record the miner's pay method (manually sent coin by pool maintainer)
@@ -47,7 +48,7 @@ knowledge about this, check [here](https://github.com/mimblewimble/grin/blob/mas
 
 #### For miner
 
-these 2 param is required
+In miner's config(a `.toml` config file), these 2 params are **required**
 
 ```toml
 # login for the stratum server (if required)
@@ -61,6 +62,5 @@ stratum_server_password = "loginPass"
 
 ### TODO
 - Web UI
-- payment
 - more accurate hashrate
 - more
