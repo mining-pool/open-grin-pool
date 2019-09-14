@@ -33,5 +33,8 @@
     "owner_api_port": 3420,
     "auth_user": "epic",
     "auth_pass": "FoakPxzMy56Z4gJPCHKZ"
+  },
+  "payer": {
+    "fee": 0.01
   }
 }

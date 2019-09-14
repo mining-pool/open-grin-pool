@@ -133,7 +133,7 @@ func (db *database) getAllBlockHashes() []string {
 	return l
 }
 
-func (db *database) calcTodayRevenue(totalRevenue uint64) {
+func (db *database) calcRevenueToday(totalRevenue uint64) {
 	allMinersStrSharesTable, err := db.client.HGetAll("shares").Result()
 	if err != nil {
 		logger.Error(err)
@@ -160,7 +160,8 @@ func (db *database) calcTodayRevenue(totalRevenue uint64) {
 	for miner, shares := range allMinersSharesTable {
 		allMinersRevenueTable[miner] = shares / totalShare * totalRevenue
 
-		_, err = fmt.Fprintf(f, "%s %d\n", miner, allMinersSharesTable[miner])
+		payment := db.client.HGet("u+"+miner, "payment")
+		_, err = fmt.Fprintf(f, "%s %d %s\n", miner, allMinersSharesTable[miner], payment)
 	}
 
 	db.client.HMSet("lastDayRevenue", allMinersRevenueTable)
