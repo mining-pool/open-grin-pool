@@ -43,6 +43,10 @@ func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json
 				logger.Error(err)
 				return
 			}
+
+			resp, _ := sr.MarshalJSON()
+			logger.Info("Node returns a response: ", string(resp))
+
 			go callback(sr)
 		}
 	}

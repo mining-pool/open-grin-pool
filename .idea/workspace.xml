@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stratumServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/stratumServer.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -23,6 +24,7 @@
   </component>
   <component name="GOROOT" path="C:\Go" />
   <component name="Git.Settings">
+    <option name="PREVIEW_PUSH_PROTECTED_ONLY" value="true" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$" value="master" />
@@ -45,7 +47,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../libblockchain" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="vcs.Git" />
@@ -78,6 +80,16 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="ServiceViewManager">
+    <option name="allServicesViewState">
+      <serviceView>
+        <treeState>
+          <expand />
+          <select />
+        </treeState>
+      </serviceView>
+    </option>
+  </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
@@ -105,7 +117,6 @@
     <MESSAGE value="[bugFix&amp;newApi&amp;clean]add `/shares`, remove some listeners, modified the readme" />
     <MESSAGE value="[bugFix]deal with `/miner/{login}` api problem" />
     <MESSAGE value="[change]replace logging with logger" />
-    <MESSAGE value="[bugFix]" />
     <MESSAGE value="[bugFix]put parseConf and logger to the main func" />
     <MESSAGE value="[change]replace log with logger" />
     <MESSAGE value="[bugFix]break after register leads to the miner offline" />
@@ -114,7 +125,15 @@
     <MESSAGE value="[update]note in readme" />
     <MESSAGE value="[update&amp;bugFix]provide more toleration for miner who have not login, in which can get rid of some potential bugs" />
     <MESSAGE value="[update] update the readme.md" />
-    <option name="LAST_COMMIT_MESSAGE" value="[update] update the readme.md" />
+    <MESSAGE value="[!bugFix] switch" />
+    <MESSAGE value="[bugFix] validation of login" />
+    <MESSAGE value="[bugFix?] share calculation" />
+    <MESSAGE value="[add] payer.Fee and the payment field in exported revenue table" />
+    <MESSAGE value="[add] multi agent support" />
+    <MESSAGE value="[optimize] multi agent status json" />
+    <MESSAGE value="[add&amp;bugFix] add resp Info and fix the bug of missing status" />
+    <MESSAGE value="[bugFix]" />
+    <option name="LAST_COMMIT_MESSAGE" value="[bugFix]" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

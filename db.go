@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -75,10 +76,11 @@ func (db *database) updatePayment(login, payment string) {
 }
 
 func (db *database) putShare(login string, diff int64) {
-	tx := db.client.TxPipeline()
-	tx.HIncrBy("shares", login, diff)
-	tx.HSet("u+"+login, "lastShare", time.Now().UnixNano())
-	_, err := tx.Exec()
+	_, err := db.client.HIncrBy("shares", login, diff).Result()
+	if err != nil {
+		logger.Error(err)
+	}
+	_, err = db.client.HSet("u+"+login, "lastShare", time.Now().UnixNano()).Result()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -100,17 +102,25 @@ func (db *database) putMinerStatus(login string, statusTable map[string]interfac
 	}
 }
 
-func (db *database) getMinerStatus(login string) map[string]string {
+func (db *database) getMinerStatus(login string) map[string]interface{} {
 	m, err := db.client.HGetAll("u+" + login).Result()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	return m
+	rtn := make(map[string]interface{})
+	for k, v := range m {
+		var i interface{}
+		_ = json.Unmarshal([]byte(v), &i)
+		rtn[k] = i
+	}
+
+	return rtn
 }
 
-func (db *database) setMinerStatus(login string, more map[string]interface{}) {
-	_, err := db.client.HMSet("u+"+login, more).Result()
+func (db *database) setMinerStatus(login, agent string, more map[string]interface{}) {
+	raw, _ := json.Marshal(more)
+	_, err := db.client.HSet("u+"+login, agent, raw).Result()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -132,7 +142,7 @@ func (db *database) getAllBlockHashes() []string {
 	return l
 }
 
-func (db *database) calcTodayRevenue(totalRevenue uint64) {
+func (db *database) calcRevenueToday(totalRevenue uint64) {
 	allMinersStrSharesTable, err := db.client.HGetAll("shares").Result()
 	if err != nil {
 		logger.Error(err)
@@ -159,7 +169,8 @@ func (db *database) calcTodayRevenue(totalRevenue uint64) {
 	for miner, shares := range allMinersSharesTable {
 		allMinersRevenueTable[miner] = shares / totalShare * totalRevenue
 
-		_, err = fmt.Fprintf(f, "%s %d\n", miner, allMinersSharesTable[miner])
+		payment := db.client.HGet("u+"+miner, "payment")
+		_, err = fmt.Fprintf(f, "%s %d %s\n", miner, allMinersSharesTable[miner], payment)
 	}
 
 	db.client.HMSet("lastDayRevenue", allMinersRevenueTable)

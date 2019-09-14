@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"math/rand"
 	"net"
 	"strconv"
 	"strings"
@@ -35,11 +36,12 @@ type stratumResponse struct {
 
 type minerSession struct {
 	login      string
+	agent      string
 	difficulty int64
 	ctx        context.Context
 }
 
-func (ms *minerSession) hasLoggedIn() bool {
+func (ms *minerSession) hasNotLoggedIn() bool {
 	return ms.login == ""
 }
 
@@ -51,23 +53,23 @@ func (ms *minerSession) handleMethod(res *stratumResponse, db *database) {
 			break
 		}
 		result, _ := res.Result.(map[string]interface{})
-		db.setMinerStatus(ms.login, result)
+		db.setMinerStatus(ms.login, ms.agent, result)
 		ms.difficulty, _ = result["difficulty"].(int64)
 
 		break
 	case "submit":
 		db.putShare(ms.login, ms.difficulty)
 		if res.Error != nil {
-			logger.Warning(ms.login, "'s share has err:", res.Error)
+			logger.Warning(ms.login, "'s share has err: ", res.Error)
 			break
 		}
 		detail, ok := res.Result.(string)
-		logger.Info(ms.login, "has submit a", detail, "share")
+		logger.Info(ms.login, " has submit a ", detail, " share")
 		if ok {
 			if strings.Contains(detail, "block - ") {
 				blockHash := strings.Trim(detail, "block - ")
 				db.putBlockHash(blockHash)
-				logger.Warning("block", blockHash, "has been found by", ms.login)
+				logger.Warning("block ", blockHash, " has been found by ", ms.login)
 			}
 		}
 		break
@@ -159,8 +161,23 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 				return
 			}
 
+			agent, ok := clientReq.Params["agent"].(string)
+			if !ok {
+				logger.Error("login module broken")
+				return
+			}
+
 			login = strings.TrimSpace(login)
 			pass = strings.TrimSpace(pass)
+			agent = strings.TrimSpace(agent)
+
+			if login == "" {
+				return
+			}
+
+			if agent == "" {
+				agent = "NoNameMiner" + strconv.FormatInt(rand.Int63(), 10)
+			}
 
 			switch ss.db.verifyMiner(login, pass) {
 			case wrongPassword:
@@ -168,11 +185,12 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 				return
 			case noPassword:
 				ss.db.registerMiner(login, pass, "")
-				logger.Warning(login, " has registered")
+				logger.Info(login, " has registered in")
 			case correctPassword:
 			}
 
 			session.login = login
+			session.agent = agent
 			logger.Info(session.login, " has logged in")
 			go relay2Node(nc, jsonRaw)
 			break
@@ -183,7 +201,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		//case "keepalive":
 		//case "height":
 		default:
-			if !session.hasLoggedIn() {
+			if session.hasNotLoggedIn() {
 				logger.Warning(login, " has not logged in")
 			}
 

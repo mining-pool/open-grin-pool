@@ -31,7 +31,8 @@ func (p *payer) getNewBalance() uint64 {
 // distribute coins when balance is > 1000 nano
 func (p *payer) distribute(newBalance uint64) {
 	// get a distribution table
-	p.db.calcTodayRevenue(newBalance)
+	revenue4Miners := uint64(float64(newBalance) * (1 - p.conf.Payer.Fee))
+	p.db.calcRevenueToday(revenue4Miners)
 }
 
 func (p *payer) watch() {

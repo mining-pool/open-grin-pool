@@ -43,6 +43,9 @@ type config struct {
 		AuthUser     string `json:"auth_user"`
 		AuthPass     string `json:"auth_pass"`
 	} `json:"wallet"`
+	Payer struct {
+		Fee float64 `json:"fee"`
+	} `json:"payer"`
 }
 
 func parseConfig() *config {
