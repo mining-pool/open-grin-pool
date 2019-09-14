@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -110,8 +111,9 @@ func (db *database) getMinerStatus(login string) map[string]string {
 	return m
 }
 
-func (db *database) setMinerStatus(login string, more map[string]interface{}) {
-	_, err := db.client.HMSet("u+"+login, more).Result()
+func (db *database) setMinerStatus(login, agent string, more map[string]interface{}) {
+	raw, _ := json.Marshal(more)
+	_, err := db.client.HSet("u+"+login, agent, raw).Result()
 	if err != nil {
 		logger.Error(err)
 	}
