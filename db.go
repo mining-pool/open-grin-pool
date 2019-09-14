@@ -110,7 +110,9 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 
 	rtn := make(map[string]interface{})
 	for k, v := range m {
-		_ = json.Unmarshal([]byte(v), rtn[k])
+		var i interface{}
+		_ = json.Unmarshal([]byte(v), &i)
+		rtn[k] = i
 	}
 
 	return rtn

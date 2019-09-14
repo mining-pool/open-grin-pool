@@ -4,6 +4,7 @@
     <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nodeStratumClient.go" beforeDir="false" afterPath="$PROJECT_DIR$/nodeStratumClient.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -130,7 +131,8 @@
     <MESSAGE value="[bugFix?] share calculation" />
     <MESSAGE value="[add] payer.Fee and the payment field in exported revenue table" />
     <MESSAGE value="[add] multi agent support" />
-    <option name="LAST_COMMIT_MESSAGE" value="[add] multi agent support" />
+    <MESSAGE value="[optimize] multi agent status json" />
+    <option name="LAST_COMMIT_MESSAGE" value="[optimize] multi agent status json" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
