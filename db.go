@@ -102,13 +102,18 @@ func (db *database) putMinerStatus(login string, statusTable map[string]interfac
 	}
 }
 
-func (db *database) getMinerStatus(login string) map[string]string {
+func (db *database) getMinerStatus(login string) map[string]interface{} {
 	m, err := db.client.HGetAll("u+" + login).Result()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	return m
+	rtn := make(map[string]interface{})
+	for k, v := range m {
+		_ = json.Unmarshal([]byte(v), rtn[k])
+	}
+
+	return rtn
 }
 
 func (db *database) setMinerStatus(login, agent string, more map[string]interface{}) {
