@@ -60,16 +60,16 @@ func (ms *minerSession) handleMethod(res *stratumResponse, db *database) {
 	case "submit":
 		db.putShare(ms.login, ms.difficulty)
 		if res.Error != nil {
-			logger.Warning(ms.login, "'s share has err:", res.Error)
+			logger.Warning(ms.login, "'s share has err: ", res.Error)
 			break
 		}
 		detail, ok := res.Result.(string)
-		logger.Info(ms.login, "has submit a", detail, "share")
+		logger.Info(ms.login, " has submit a ", detail, " share")
 		if ok {
 			if strings.Contains(detail, "block - ") {
 				blockHash := strings.Trim(detail, "block - ")
 				db.putBlockHash(blockHash)
-				logger.Warning("block", blockHash, "has been found by", ms.login)
+				logger.Warning("block ", blockHash, " has been found by ", ms.login)
 			}
 		}
 		break
