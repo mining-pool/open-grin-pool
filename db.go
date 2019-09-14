@@ -75,10 +75,11 @@ func (db *database) updatePayment(login, payment string) {
 }
 
 func (db *database) putShare(login string, diff int64) {
-	tx := db.client.TxPipeline()
-	tx.HIncrBy("shares", login, diff)
-	tx.HSet("u+"+login, "lastShare", time.Now().UnixNano())
-	_, err := tx.Exec()
+	_, err := db.client.HIncrBy("shares", login, diff).Result()
+	if err != nil {
+		logger.Error(err)
+	}
+	_, err = db.client.HSet("u+"+login, "lastShare", time.Now().UnixNano()).Result()
 	if err != nil {
 		logger.Error(err)
 	}
