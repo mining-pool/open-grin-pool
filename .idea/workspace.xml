@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/js/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/js/miner.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/miner.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/miner.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/miner.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -113,7 +109,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
-    <MESSAGE value="using redis in replace of badger" />
     <MESSAGE value="[big change]using redis in replace of badger" />
     <MESSAGE value="[bugFix&amp;newApi&amp;clean]add `/shares`, remove some listeners, modified the readme" />
     <MESSAGE value="[bugFix]deal with `/miner/{login}` api problem" />
@@ -138,7 +133,8 @@
     <MESSAGE value="[bugFix&amp;update] fix the share diff bug, update new strategy on payer and inaccurate hashrate in experiment" />
     <MESSAGE value="[add&amp;update] update the hashrate to the agents' hashrate and total hashrate, add simple WebUI." />
     <MESSAGE value="[add] enable cors" />
-    <option name="LAST_COMMIT_MESSAGE" value="[add] enable cors" />
+    <MESSAGE value="[bugFix] excess json parse in js" />
+    <option name="LAST_COMMIT_MESSAGE" value="[bugFix] excess json parse in js" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

@@ -32,7 +32,7 @@ function registerPayment() {
     xhr.onload = function () {
         let status = xhr.status;
         if (status === 200) {
-            alert(xhr.responseText)
+            alert(xhr.response)
         } else {
             console.log(xhr.response)
         }
