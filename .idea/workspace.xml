@@ -129,13 +129,13 @@
     <MESSAGE value="[add] multi agent support" />
     <MESSAGE value="[optimize] multi agent status json" />
     <MESSAGE value="[add&amp;bugFix] add resp Info and fix the bug of missing status" />
-    <MESSAGE value="[bugFix]" />
     <MESSAGE value="[update] some tips in readme" />
     <MESSAGE value="[bugFix&amp;update] fix the share diff bug, update new strategy on payer and inaccurate hashrate in experiment" />
     <MESSAGE value="[add&amp;update] update the hashrate to the agents' hashrate and total hashrate, add simple WebUI." />
     <MESSAGE value="[add] enable cors" />
     <MESSAGE value="[bugFix] excess json parse in js" />
-    <option name="LAST_COMMIT_MESSAGE" value="[bugFix] excess json parse in js" />
+    <MESSAGE value="[bugFix]" />
+    <option name="LAST_COMMIT_MESSAGE" value="[bugFix]" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

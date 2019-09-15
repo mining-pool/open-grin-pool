@@ -24,7 +24,7 @@ xhr.onload = function () {
 
         document.getElementById("conn").innerText = pool.node_status.connections;
         document.getElementById("height").innerText = pool.node_status.tip.height;
-        document.getElementById("diff").innerText = pool.node_status.tip.total_difficulty
+        document.getElementById("diff").innerText = JSON.stringify(pool.node_status.tip.total_difficulty)
     } else {
         console.log(xhr.response)
     }
