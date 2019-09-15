@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/google/logger"
 )
 
 type payer struct {
@@ -37,10 +40,27 @@ func (p *payer) distribute(newBalance uint64) {
 
 func (p *payer) watch() {
 	go func() {
-		ch := time.Tick(24 * time.Hour)
+		m := strings.Split(p.conf.Payer.Time, ":")
+		hour, err := strconv.Atoi(m[0])
+		if err != nil {
+			logger.Error(err)
+		}
+		min, err := strconv.Atoi(m[1])
+		if err != nil {
+			logger.Error(err)
+		}
+
 		for {
+			now := time.Now()
+			t := time.Date(now.Year(), now.Month(), now.Day(), hour, min, 0, 0, now.Location())
+			if t.After(now) == false {
+				next := now.Add(time.Hour * 24)
+				t = time.Date(next.Year(), next.Month(), next.Day(), hour, min, 0, 0, next.Location())
+			}
+			timer := time.NewTimer(t.Sub(now))
+
 			select {
-			case <-ch:
+			case <-timer.C:
 				newBalance := p.getNewBalance()
 				if newBalance > 1000 {
 					p.distribute(newBalance - 1000)
