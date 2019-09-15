@@ -31,7 +31,7 @@ func (p *payer) getNewBalance() uint64 {
 	return uint64(spendable) // unit nanogrin
 }
 
-// distribute coins when balance is > 1000 nano
+// distribute coins when balance is > 1e9 nano
 func (p *payer) distribute(newBalance uint64) {
 	// get a distribution table
 	revenue4Miners := uint64(float64(newBalance) * (1 - p.conf.Payer.Fee))
@@ -62,8 +62,8 @@ func (p *payer) watch() {
 			select {
 			case <-timer.C:
 				newBalance := p.getNewBalance()
-				if newBalance > 1000 {
-					p.distribute(newBalance - 1000)
+				if newBalance > 1e9 {
+					p.distribute(newBalance - 1e9)
 				}
 			}
 		}

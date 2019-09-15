@@ -76,24 +76,16 @@ func (db *database) updatePayment(login, payment string) {
 }
 
 func (db *database) putShare(login, agent string, diff int64) {
+	db.putDayShare(login, diff)
+
+	_, err := db.client.HSet("u+"+login, "lastShare", time.Now().UnixNano()).Result()
+	if err != nil {
+		logger.Error(err)
+	}
+}
+
+func (db *database) putDayShare(login string, diff int64) {
 	_, err := db.client.HIncrBy("shares", login, diff).Result()
-	if err != nil {
-		logger.Error(err)
-	}
-	strUnixNano, err := db.client.HGet("u+"+login, "lastShare").Result()
-	if err != nil {
-		logger.Error(err)
-	}
-	lastShareTime, err := strconv.ParseInt(strUnixNano, 10, 64)
-	if err != nil {
-		logger.Error(err)
-	}
-	hashrate := diff * 1000 / (time.Now().UnixNano() - lastShareTime)
-	_, err = db.client.HSet("u+"+login, "lastShare", time.Now().UnixNano()).Result()
-	if err != nil {
-		logger.Error(err)
-	}
-	_, err = db.client.HSet("u+"+login, agent+"Hashrate", hashrate).Result()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -122,18 +114,49 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 	}
 
 	rtn := make(map[string]interface{})
+	var totalHS int64
+
 	for k, v := range m {
-		var i interface{}
-		_ = json.Unmarshal([]byte(v), &i)
-		rtn[k] = i
+		if k == "agents" {
+			var i interface{}
+
+			_ = json.Unmarshal([]byte(v), &i)
+			agents, _ := i.(map[string]interface{})
+			for _, status := range agents {
+				s := status.(map[string]interface{})
+				hs, _ := s["hashrate"].(int64)
+				totalHS = totalHS + hs
+			}
+			rtn[k] = i
+		} else {
+			rtn[k] = v
+		}
 	}
+
+	rtn["hashrate"] = totalHS
+	delete(rtn, "pass")
 
 	return rtn
 }
 
-func (db *database) setMinerStatus(login, agent string, more map[string]interface{}) {
-	raw, _ := json.Marshal(more)
-	_, err := db.client.HSet("u+"+login, agent, raw).Result()
+func (db *database) setMinerAgentStatus(login, agent string, diff int64, status map[string]interface{}) {
+	s, err := db.client.HGet("u+"+login, "agents").Result()
+	if err != nil {
+		logger.Error(err)
+	}
+
+	strUnixNano, _ := db.client.HGet("u+"+login, "lastShare").Result()
+	lastShareTime, _ := strconv.ParseInt(strUnixNano, 10, 64)
+	hashrate := diff * 1e9 / (time.Now().UnixNano() - lastShareTime)
+	status["hashrate"] = hashrate
+
+	agents := make(map[string]interface{})
+	_ = json.Unmarshal([]byte(s), &agents)
+
+	agents[agent] = status
+
+	raw, _ := json.Marshal(agents)
+	_, err = db.client.HSet("u+"+login, "agents", raw).Result()
 	if err != nil {
 		logger.Error(err)
 	}
