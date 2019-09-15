@@ -6,7 +6,7 @@ xhr.responseType = 'json';
 xhr.onload = function () {
     let status = xhr.status;
     if (status === 200) {
-        let miner = JSON.parse(xhr.responseText);
+        let miner = xhr.response;
 
         document.getElementById("ths").innerText = miner.hashrate;
         agents = document.getElementById("agents");

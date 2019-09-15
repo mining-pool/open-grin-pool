@@ -12,7 +12,7 @@ xhr.responseType = 'json';
 xhr.onload = function () {
     let status = xhr.status;
     if (status === 200) {
-        let pool = JSON.parse(xhr.responseText);
+        let pool = xhr.responseText;
 
         let divBlocks = document.getElementById("blocks");
         for (i = 0; i < pool.mined_blocks.length; i++) {
