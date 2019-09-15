@@ -42,33 +42,12 @@ Maintainer can manually use this command to send the coin `grin wallet send -d h
 
 #### For server
 
-```toml
-[server.stratum_mining_config]
-
-#whether stratum server is enabled
-enable_stratum_server = true
-
-#what port and address for the stratum server to listen on
-stratum_server_addr = "127.0.0.1:3416"
-
-#the amount of time, in seconds, to attempt to mine on a particular
-#header before stopping and re-collecting transactions from the pool
-attempt_time_per_block = 15 # Should be shorter
-cuckatoo_minimum_share_difficulty = 3 # Should be a little bit larger
-randomx_minimum_share_difficulty = 5000 # Should be a little bit larger
-progpow_minimum_share_difficulty = 100000 # Should be a little bit larger
-
-#the wallet receiver to which coinbase rewards will be sent
-wallet_listener_url = "http://127.0.0.1:3415"
-
-#whether to ignore the reward (mostly for testing)
-burn_reward = false
-
-```
-
-if you are using epic you can keep all default except `auth_pass`. The password can be found in the `.api_secret` file. 
+If you are using epic you can keep all default except `auth_pass`. The password can be found in the `.api_secret` file. 
     
 knowledge about this, check [here](https://github.com/mimblewimble/grin/blob/master/doc/api/api.md)
+
+The `diff` should be the same difficulty to what you configured in server's (not pool's) `.toml` config file.
+
 
 #### For miner
 

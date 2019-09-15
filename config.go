@@ -36,6 +36,7 @@ type config struct {
 		StratumPort int    `json:"stratum_port"`
 		AuthUser    string `json:"auth_user"`
 		AuthPass    string `json:"auth_pass"`
+		Diff        int    `json:"diff"`
 	} `json:"node"`
 	Wallet struct {
 		Address      string `json:"address"`
@@ -44,7 +45,8 @@ type config struct {
 		AuthPass     string `json:"auth_pass"`
 	} `json:"wallet"`
 	Payer struct {
-		Fee float64 `json:"fee"`
+		Time string  `json:"time"`
+		Fee  float64 `json:"fee"`
 	} `json:"payer"`
 }
 

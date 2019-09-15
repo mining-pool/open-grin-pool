@@ -54,11 +54,10 @@ func (ms *minerSession) handleMethod(res *stratumResponse, db *database) {
 		}
 		result, _ := res.Result.(map[string]interface{})
 		db.setMinerStatus(ms.login, ms.agent, result)
-		ms.difficulty, _ = result["difficulty"].(int64)
 
 		break
 	case "submit":
-		db.putShare(ms.login, ms.difficulty)
+		db.putShare(ms.login, ms.agent, ms.difficulty)
 		if res.Error != nil {
 			logger.Warning(ms.login, "'s share has err: ", res.Error)
 			break
@@ -102,7 +101,7 @@ func callStatusPerInterval(ctx context.Context, nc *nodeClient) {
 
 func (ss *stratumServer) handleConn(conn net.Conn) {
 	logger.Info("new conn from ", conn.RemoteAddr())
-	session := &minerSession{difficulty: 1}
+	session := &minerSession{difficulty: int64(ss.conf.Node.Diff)}
 	defer conn.Close()
 	var login string
 	nc := initNodeStratumClient(ss.conf)
@@ -195,11 +194,6 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			go relay2Node(nc, jsonRaw)
 			break
 
-		//case "submit": // migrate to the resp handler
-		//case "getjobtemplate":
-		//case "job":
-		//case "keepalive":
-		//case "height":
 		default:
 			if session.hasNotLoggedIn() {
 				logger.Warning(login, " has not logged in")
@@ -245,46 +239,3 @@ func initStratumServer(db *database, conf *config) {
 		go ss.handleConn(conn)
 	}
 }
-
-// Deleted
-//func (ss *stratumServer) backupPerInterval() {
-//	d, err := time.ParseDuration(ss.conf.StratumServer.BackupInterval)
-//	if err != nil {
-//		logger.Println("failed to start export system", err)
-//		return
-//	}
-//
-//	logger.Println("export system running")
-//
-//	ch := time.Tick(d)
-//	for {
-//		select {
-//		case <-ch:
-//			newFileName := strconv.Itoa(time.Now().Year()) + "-" +
-//				time.Now().Month().String() + "-" + strconv.Itoa(time.Now().Day()) +
-//				"-" + strconv.Itoa(time.Now().Hour())
-//			f, err := os.Create(newFileName + ".csv")
-//			if err != nil {
-//				logger.Println(err)
-//				continue
-//			}
-//			_ = ss.db.View(func(txn *badger.Txn) error {
-//				it := txn.NewIterator(badger.DefaultIteratorOptions)
-//				defer it.Close()
-//				prefix := []byte("shares+")
-//				for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-//					item := it.Item()
-//					k := item.Key()
-//					_ = item.Value(func(v []byte) error {
-//						_, err = fmt.Fprintf(f, "%s %d\n", k, new(big.Int).SetBytes(v).Uint64())
-//						logger.Println(err)
-//						return nil
-//					})
-//				}
-//
-//				return nil
-//			})
-//			_ = f.Close()
-//		}
-//	}
-//}
