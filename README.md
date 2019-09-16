@@ -1,5 +1,7 @@
 # open-grin-pool
 
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool?ref=badge_shield) [![Build Status](https://travis-ci.org/maoxs2/open-grin-pool.svg?branch=master)](https://travis-ci.org/maoxs2/open-grin-pool)
+
 this pool is originally designed for epic (=[epicash](http://epic.tech)). And the codebase of epic is grin so it can be generally used as the grin pool. 
 
 ### features
@@ -37,6 +39,10 @@ WebAPI:
 POST upload the payment method. e.g. ` curl 127.0.0.1:3333/miner/Hello` will get the json of "Hello"'s status. `curl  -X POST -d "{'pass': 'passwordOfHello', 'pm': 'http://<IP>:<PORT>'}" 127.0.0.1:3333/miner/Hello`
 
 Maintainer can manually use this command to send the coin `grin wallet send -d http://<IP>:<PORT>`. Note, ensure the receiver online before your sending.
+
+WebPage:
+- replace the api address to your api in the web/config.js
+- move all files in web to your nginx/apache folder
 
 ### Config
 
