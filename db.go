@@ -191,7 +191,7 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 	var totalShare uint64
 	allMinersSharesTable := make(map[string]uint64)
 	for miner, shares := range allMinersStrSharesTable {
-		_, err = fmt.Fprintf(f, "%s %d\n", miner, shares)
+		_, err = fmt.Fprintf(f, "%s %s\n", miner, shares)
 
 		allMinersSharesTable[miner], _ = strconv.ParseUint(shares, 10, 64)
 		totalShare = totalShare + allMinersSharesTable[miner]
