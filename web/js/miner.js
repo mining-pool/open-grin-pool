@@ -22,7 +22,7 @@ xhr.onload = function () {
     }
 };
 
-xhr.send(json);
+xhr.send();
 
 function registerPayment() {
     let pass = document.getElementById("pass").value;

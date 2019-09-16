@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/js/miner.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/miner.js" afterDir="false" />
     </list>
-    <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,7 +46,7 @@
     <option name="PREVIEW_PUSH_PROTECTED_ONLY" value="true" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="multi-algo" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -95,6 +95,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build github.com/maoxs2/pool" />
         <item itemvalue="Go Build.go build github.com/maoxs2/pool" />
       </list>
     </recent_temporary>
