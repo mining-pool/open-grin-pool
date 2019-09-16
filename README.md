@@ -1,4 +1,6 @@
 # open-grin-pool
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool?ref=badge_shield)
+
 
 this pool is originally designed for epic (=[epicash](http://epic.tech)). And the codebase of epic is grin so it can be generally used as the grin pool. 
 
@@ -67,3 +69,7 @@ stratum_server_password = "loginPass"
 - Web UI
 - more accurate hashrate
 - more
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool?ref=badge_large)
