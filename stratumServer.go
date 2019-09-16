@@ -134,45 +134,26 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		err := dec.Decode(&jsonRaw)
 		if err != nil {
 			logger.Error(err)
-			return
 		}
 
 		err = json.Unmarshal(jsonRaw, &clientReq)
 		if err != nil {
 			logger.Error(err)
-			return
 		}
 
 		logger.Info(conn.RemoteAddr(), " sends a ", clientReq.Method, " request:", string(jsonRaw))
 
 		switch clientReq.Method {
 		case "login":
-			var ok bool
-			login, ok = clientReq.Params["login"].(string)
-			if !ok {
-				logger.Error("login module broken")
-				return
-			}
+			login, _ = clientReq.Params["login"].(string)
 
-			pass, ok := clientReq.Params["pass"].(string)
-			if !ok {
-				logger.Error("login module broken")
-				return
-			}
+			pass, _ := clientReq.Params["pass"].(string)
 
-			agent, ok := clientReq.Params["agent"].(string)
-			if !ok {
-				logger.Error("login module broken")
-				return
-			}
+			agent, _ := clientReq.Params["agent"].(string)
 
 			login = strings.TrimSpace(login)
 			pass = strings.TrimSpace(pass)
 			agent = strings.TrimSpace(agent)
-
-			if login == "" {
-				return
-			}
 
 			if agent == "" {
 				agent = "NoNameMiner" + strconv.FormatInt(rand.Int63(), 10)
@@ -181,18 +162,29 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			switch ss.db.verifyMiner(login, pass) {
 			case wrongPassword:
 				logger.Warning(login, " has failed to login")
-				return
+				login = ""
+				_, _ = conn.Write([]byte(`{  
+   "id":"5",
+   "jsonrpc":"2.0",
+   "method":"login",
+   "error":{  
+      "code":-32500,
+      "message":"login incorrect"
+   }
+}`))
+
 			case noPassword:
 				ss.db.registerMiner(login, pass, "")
 				logger.Info(login, " has registered in")
+
 			case correctPassword:
+
 			}
 
 			session.login = login
 			session.agent = agent
-			logger.Info(session.login, " has logged in")
+			logger.Info(session.login, "'s ", agent, " has logged in")
 			go relay2Node(nc, jsonRaw)
-			break
 
 		default:
 			if session.hasNotLoggedIn() {
