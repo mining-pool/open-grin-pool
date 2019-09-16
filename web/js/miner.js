@@ -1,7 +1,7 @@
 document.getElementById("login").innerText = window.location.search.substr(7);
 
 let xhr = new XMLHttpRequest();
-xhr.open('GET', API + "/miner" + window.location.search.substr(7), true);
+xhr.open('GET', API + "/miner/" + window.location.search.substr(7), true);
 xhr.responseType = 'json';
 xhr.onload = function () {
     let status = xhr.status;
