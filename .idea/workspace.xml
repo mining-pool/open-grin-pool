@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/js/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/index.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -110,7 +110,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
-    <MESSAGE value="[big change]using redis in replace of badger" />
     <MESSAGE value="[bugFix&amp;newApi&amp;clean]add `/shares`, remove some listeners, modified the readme" />
     <MESSAGE value="[bugFix]deal with `/miner/{login}` api problem" />
     <MESSAGE value="[change]replace logging with logger" />
@@ -135,7 +134,8 @@
     <MESSAGE value="[add] enable cors" />
     <MESSAGE value="[bugFix] excess json parse in js" />
     <MESSAGE value="[bugFix]" />
-    <option name="LAST_COMMIT_MESSAGE" value="[bugFix]" />
+    <MESSAGE value="[bugFix] keep compatibility with epic and grin" />
+    <option name="LAST_COMMIT_MESSAGE" value="[bugFix] keep compatibility with epic and grin" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
