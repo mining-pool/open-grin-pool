@@ -1,4 +1,6 @@
 # open-grin-pool
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool?ref=badge_shield)
+
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool?ref=badge_shield) [![Build Status](https://travis-ci.org/maoxs2/open-grin-pool.svg?branch=master)](https://travis-ci.org/maoxs2/open-grin-pool)
 
@@ -73,3 +75,7 @@ stratum_server_password = "loginPass"
 - Web UI
 - more accurate hashrate
 - more
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool?ref=badge_large)
