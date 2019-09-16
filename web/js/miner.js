@@ -22,6 +22,8 @@ xhr.onload = function () {
     }
 };
 
+xhr.send(json);
+
 function registerPayment() {
     let pass = document.getElementById("pass").value;
     let pm = document.getElementById("pm").value;
