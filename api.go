@@ -17,28 +17,33 @@ type apiServer struct {
 
 func (as *apiServer) revenueHandler(w http.ResponseWriter, r *http.Request) {
 	var raw []byte
+	header := w.Header()
+	header.Set("Content-Type", "application/json")
+	header.Set("Access-Control-Allow-Origin", "*")
 
 	table := as.db.getLastDayRevenue()
 	raw, _ = json.Marshal(table)
 
-	header := w.Header()
-	header.Set("Content-Type", "application/json")
 	_, _ = w.Write(raw)
 }
 
 func (as *apiServer) sharesHandler(w http.ResponseWriter, r *http.Request) {
 	var raw []byte
+	header := w.Header()
+	header.Set("Content-Type", "application/json")
+	header.Set("Access-Control-Allow-Origin", "*")
 
 	table := as.db.getShares()
 	raw, _ = json.Marshal(table)
 
-	header := w.Header()
-	header.Set("Content-Type", "application/json")
 	_, _ = w.Write(raw)
 }
 
 func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 	var blockBatch []string
+	header := w.Header()
+	header.Set("Content-Type", "application/json")
+	header.Set("Access-Control-Allow-Origin", "*")
 
 	blockBatch = as.db.getAllBlockHashes()
 
@@ -61,8 +66,6 @@ func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	header := w.Header()
-	header.Set("Content-Type", "application/json")
 	_, _ = w.Write(raw)
 }
 
@@ -76,6 +79,7 @@ func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 
 	header := w.Header()
 	header.Set("Content-Type", "application/json")
+	header.Set("Access-Control-Allow-Origin", "*")
 
 	vars := mux.Vars(r)
 	login := vars["miner_login"]

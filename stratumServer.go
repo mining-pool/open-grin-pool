@@ -53,7 +53,7 @@ func (ms *minerSession) handleMethod(res *stratumResponse, db *database) {
 			break
 		}
 		result, _ := res.Result.(map[string]interface{})
-		db.setMinerStatus(ms.login, ms.agent, result)
+		db.setMinerAgentStatus(ms.login, ms.agent, ms.difficulty, result)
 
 		break
 	case "submit":

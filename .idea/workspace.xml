@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="[bugFix&amp;update] new strategy on payer and">
+    <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/payer.go" beforeDir="false" afterPath="$PROJECT_DIR$/payer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stratumServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/stratumServer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/js/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/index.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -115,8 +110,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
-    <MESSAGE value="add revenue(payer) func and some bug fix" />
-    <MESSAGE value="using redis in replace of badger" />
     <MESSAGE value="[big change]using redis in replace of badger" />
     <MESSAGE value="[bugFix&amp;newApi&amp;clean]add `/shares`, remove some listeners, modified the readme" />
     <MESSAGE value="[bugFix]deal with `/miner/{login}` api problem" />
@@ -136,9 +129,13 @@
     <MESSAGE value="[add] multi agent support" />
     <MESSAGE value="[optimize] multi agent status json" />
     <MESSAGE value="[add&amp;bugFix] add resp Info and fix the bug of missing status" />
-    <MESSAGE value="[bugFix]" />
     <MESSAGE value="[update] some tips in readme" />
-    <option name="LAST_COMMIT_MESSAGE" value="[update] some tips in readme" />
+    <MESSAGE value="[bugFix&amp;update] fix the share diff bug, update new strategy on payer and inaccurate hashrate in experiment" />
+    <MESSAGE value="[add&amp;update] update the hashrate to the agents' hashrate and total hashrate, add simple WebUI." />
+    <MESSAGE value="[add] enable cors" />
+    <MESSAGE value="[bugFix] excess json parse in js" />
+    <MESSAGE value="[bugFix]" />
+    <option name="LAST_COMMIT_MESSAGE" value="[bugFix]" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
