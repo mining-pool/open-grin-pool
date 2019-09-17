@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/payer.go" beforeDir="false" afterPath="$PROJECT_DIR$/payer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/config.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -133,7 +130,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
-    <MESSAGE value="[bugFix]put parseConf and logger to the main func" />
     <MESSAGE value="[change]replace log with logger" />
     <MESSAGE value="[bugFix]break after register leads to the miner offline" />
     <MESSAGE value="[add]add some warning and callStatusPerInterval" />
@@ -158,13 +154,14 @@
     <MESSAGE value="[bugFix]" />
     <MESSAGE value="[bugFix] payer may produce fatal exit" />
     <MESSAGE value="[update] intro average hashrate" />
-    <option name="LAST_COMMIT_MESSAGE" value="[update] intro average hashrate" />
+    <MESSAGE value="[update] revenue table for user" />
+    <option name="LAST_COMMIT_MESSAGE" value="[update] revenue table for user" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
-    <proxy>https://goproxy.io</proxy>
+    <proxy>https://goproxy.cn</proxy>
   </component>
 </project>
