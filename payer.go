@@ -68,6 +68,8 @@ func (p *payer) watch() {
 				newBalance := p.getNewBalance()
 				if newBalance > 1e9 {
 					p.distribute(newBalance - 1e9)
+				} else {
+					p.distribute(0)
 				}
 			}
 		}

@@ -32,7 +32,7 @@ func initDB(config *config) *database {
 }
 
 func (db *database) registerMiner(login, pass, payment string) {
-	_, err := db.client.HMSet("u+"+login, map[string]interface{}{
+	_, err := db.client.HMSet("user:"+login, map[string]interface{}{
 		"pass":      pass,
 		"payment":   payment,
 		"lastShare": 0,
@@ -51,7 +51,7 @@ var (
 )
 
 func (db *database) verifyMiner(login, pass string) minerLoginStatusCode {
-	passInDB, err := db.client.HGet("u+"+login, "pass").Result()
+	passInDB, err := db.client.HGet("user:"+login, "pass").Result()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -68,7 +68,7 @@ func (db *database) verifyMiner(login, pass string) minerLoginStatusCode {
 }
 
 func (db *database) updatePayment(login, payment string) {
-	_, err := db.client.HMSet("u+"+login, map[string]interface{}{
+	_, err := db.client.HMSet("user:"+login, map[string]interface{}{
 		"payment": payment,
 	}).Result()
 	if err != nil {
@@ -80,7 +80,7 @@ func (db *database) putShare(login, agent string, diff int64) {
 	db.putDayShare(login, diff)
 	db.putTmpShare(login, agent, diff)
 
-	_, err := db.client.HSet("u+"+login, "lastShare", time.Now().UnixNano()).Result()
+	_, err := db.client.HSet("user:"+login, "lastShare", time.Now().UnixNano()).Result()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -114,14 +114,14 @@ func (db *database) getShares() map[string]string {
 }
 
 func (db *database) putMinerStatus(login string, statusTable map[string]interface{}) {
-	_, err := db.client.HMSet("u+"+login, statusTable).Result()
+	_, err := db.client.HMSet("user:"+login, statusTable).Result()
 	if err != nil {
 		logger.Error(err)
 	}
 }
 
 func (db *database) getMinerStatus(login string) map[string]interface{} {
-	m, err := db.client.HGetAll("u+" + login).Result()
+	m, err := db.client.HGetAll("user:" + login).Result()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -146,18 +146,30 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 	}
 
 	rtn["hashrate"] = totalHS
+
+	monthStartDay := time.Date(time.Now().Year(), time.Now().Month(), 0, 0, 0, 0, 0, time.Now().Location())
+	dateStart, _ := strconv.ParseFloat(monthStartDay.Format("20190102"), 10)
+	dateEnd, _ := strconv.ParseFloat(time.Now().Format("20190102"), 10)
+	dayRevenues, _ := db.client.ZRangeWithScores("revenue:"+login, int64(dateStart), int64(dateEnd)).Result()
+	table := make(map[string]interface{})
+	for _, z := range dayRevenues {
+		table[strconv.FormatInt(int64(z.Score), 10)] = z.Member
+	}
+
+	rtn["revenues"] = table
+
 	delete(rtn, "pass")
 
 	return rtn
 }
 
 func (db *database) setMinerAgentStatus(login, agent string, diff int64, status map[string]interface{}) {
-	s, err := db.client.HGet("u+"+login, "agents").Result()
+	s, err := db.client.HGet("user:"+login, "agents").Result()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	strUnixNano, _ := db.client.HGet("u+"+login, "lastShare").Result()
+	strUnixNano, _ := db.client.HGet("user:"+login, "lastShare").Result()
 	lastShareTime, _ := strconv.ParseInt(strUnixNano, 10, 64)
 	realtimeHashrate := diff * 1e9 / (time.Now().UnixNano() - lastShareTime) / int64(db.conf.Node.BlockTime)
 	status["realtime_hashrate"] = realtimeHashrate
@@ -180,7 +192,7 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 	agents[agent] = status
 
 	raw, _ := json.Marshal(agents)
-	_, err = db.client.HSet("u+"+login, "agents", raw).Result()
+	_, err = db.client.HSet("user:"+login, "agents", raw).Result()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -229,8 +241,15 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 	for miner, shares := range allMinersSharesTable {
 		allMinersRevenueTable[miner] = shares / totalShare * totalRevenue
 
-		payment := db.client.HGet("u+"+miner, "payment")
+		payment := db.client.HGet("user:"+miner, "payment")
 		_, err = fmt.Fprintf(f, "%s %d %s\n", miner, allMinersSharesTable[miner], payment)
+
+		date, _ := strconv.ParseFloat(time.Now().Format("20190102"), 10)
+		z := redis.Z{
+			Score:  date,
+			Member: allMinersSharesTable[miner],
+		}
+		db.client.ZAdd("revenue:"+miner, z)
 	}
 
 	db.client.HMSet("lastDayRevenue", allMinersRevenueTable)
@@ -245,8 +264,4 @@ func (db *database) getLastDayRevenue() map[string]string {
 	}
 
 	return allMinersRevenueTable
-}
-
-func (db *database) putPoolStatus() {
-
 }
