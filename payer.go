@@ -19,7 +19,11 @@ func (p *payer) getNewBalance() uint64 {
 	req, _ := http.NewRequest("GET", "http://"+p.conf.Wallet.Address+":"+strconv.Itoa(p.conf.Wallet.OwnerAPIPort)+"/v1/wallet/owner/retrieve_summary_info?refresh", nil)
 	req.SetBasicAuth(p.conf.Node.AuthUser, p.conf.Node.AuthPass)
 	client := &http.Client{}
-	res, _ := client.Do(req)
+	res, err := client.Do(req)
+	if err != nil {
+		logger.Error("failed to get balance from wallet, treat this as no income")
+		return 0
+	}
 
 	dec := json.NewDecoder(res.Body)
 	var summaryInfo []interface{}
