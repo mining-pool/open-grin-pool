@@ -155,11 +155,11 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 	table := make(map[string]interface{})
 	for _, z := range dayRevenues {
 		str, _ := z.Member.(string)
-		l := strings.Split(str, ":")
+		li := strings.Split(str, ":")
 		if len(li) < 2 {
 			continue
 		}
-		table[strconv.FormatInt(int64(z.Score), 10)] = l[0]
+		table[strconv.FormatInt(int64(z.Score), 10)] = li[0]
 	}
 
 	rtn["revenues"] = table
