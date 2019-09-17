@@ -27,7 +27,8 @@
     "stratum_port": 3416,
     "auth_user": "epic",
     "auth_pass": "FoakPxzMy56Z4gJPCHKZ",
-    "diff": 50000
+    "diff": 50000,
+    "block_time": 60
   },
   "wallet": {
     "address": "127.0.0.1",

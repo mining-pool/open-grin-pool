@@ -1,12 +1,5 @@
 package main
 
-import (
-	"encoding/json"
-	"os"
-
-	"github.com/google/logger"
-)
-
 type config struct {
 	Log struct {
 		Verbose   bool   `json:"verbose"`
@@ -37,6 +30,7 @@ type config struct {
 		AuthUser    string `json:"auth_user"`
 		AuthPass    string `json:"auth_pass"`
 		Diff        int    `json:"diff"`
+		BlockTime   int    `json:"block_time"`
 	} `json:"node"`
 	Wallet struct {
 		Address      string `json:"address"`
@@ -48,20 +42,4 @@ type config struct {
 		Time string  `json:"time"`
 		Fee  float64 `json:"fee"`
 	} `json:"payer"`
-}
-
-func parseConfig() *config {
-	f, err := os.Open("config.json")
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	var conf config
-	dec := json.NewDecoder(f)
-	err = dec.Decode(&conf)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	return &conf
 }

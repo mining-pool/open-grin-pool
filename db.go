@@ -13,6 +13,7 @@ import (
 
 type database struct {
 	client *redis.Client
+	conf   *config
 }
 
 func initDB(config *config) *database {
@@ -27,7 +28,7 @@ func initDB(config *config) *database {
 		logger.Fatal(err)
 	}
 
-	return &database{rdb}
+	return &database{rdb, config}
 }
 
 func (db *database) registerMiner(login, pass, payment string) {
@@ -77,6 +78,7 @@ func (db *database) updatePayment(login, payment string) {
 
 func (db *database) putShare(login, agent string, diff int64) {
 	db.putDayShare(login, diff)
+	db.putTmpShare(login, agent, diff)
 
 	_, err := db.client.HSet("u+"+login, "lastShare", time.Now().UnixNano()).Result()
 	if err != nil {
@@ -86,6 +88,17 @@ func (db *database) putShare(login, agent string, diff int64) {
 
 func (db *database) putDayShare(login string, diff int64) {
 	_, err := db.client.HIncrBy("shares", login, diff).Result()
+	if err != nil {
+		logger.Error(err)
+	}
+}
+
+func (db *database) putTmpShare(login, agent string, diff int64) {
+	z := redis.Z{
+		Score:  float64(time.Now().UnixNano()),
+		Member: diff,
+	}
+	err := db.client.ZAdd("tmp:"+login+":"+agent, z)
 	if err != nil {
 		logger.Error(err)
 	}
@@ -118,16 +131,15 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 
 	for k, v := range m {
 		if k == "agents" {
-			var i interface{}
+			var agents map[string]interface{}
+			_ = json.Unmarshal([]byte(v), &agents)
 
-			_ = json.Unmarshal([]byte(v), &i)
-			agents, _ := i.(map[string]interface{})
-			for _, status := range agents {
-				s := status.(map[string]interface{})
-				hs, _ := s["hashrate"].(int64)
+			for _, agentStatus := range agents {
+				s := agentStatus.(map[string]interface{})
+				hs, _ := s["average_hashrate"].(int64)
 				totalHS = totalHS + hs
 			}
-			rtn[k] = i
+			rtn["agents"] = agents
 		} else {
 			rtn[k] = v
 		}
@@ -147,8 +159,20 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 
 	strUnixNano, _ := db.client.HGet("u+"+login, "lastShare").Result()
 	lastShareTime, _ := strconv.ParseInt(strUnixNano, 10, 64)
-	hashrate := diff * 1e9 / (time.Now().UnixNano() - lastShareTime)
-	status["hashrate"] = hashrate
+	realtimeHashrate := diff * 1e9 / (time.Now().UnixNano() - lastShareTime) / int64(db.conf.Node.BlockTime)
+	status["realtime_hashrate"] = realtimeHashrate
+
+	l, _ := db.client.ZRange("tmp:"+login+":"+agent, time.Now().UnixNano()-10*time.Minute.Nanoseconds(), time.Now().UnixNano()).Result()
+	var sum int64
+	for _, str := range l {
+		i, err := strconv.Atoi(str)
+		if err != nil {
+			logger.Error(err)
+		}
+		sum = sum + int64(i)
+	}
+	averageHashrate := sum * 1e9 / (10 * time.Minute.Nanoseconds()) / int64(db.conf.Node.BlockTime)
+	status["average_hashrate"] = averageHashrate
 
 	agents := make(map[string]interface{})
 	_ = json.Unmarshal([]byte(s), &agents)

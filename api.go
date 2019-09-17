@@ -50,7 +50,11 @@ func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 	req, _ := http.NewRequest("GET", "http://"+as.conf.Node.Address+":"+strconv.Itoa(as.conf.Node.APIPort)+"/v1/status", nil)
 	req.SetBasicAuth(as.conf.Node.AuthUser, as.conf.Node.AuthPass)
 	client := &http.Client{}
-	res, _ := client.Do(req)
+	res, err := client.Do(req)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
 
 	dec := json.NewDecoder(res.Body)
 	var nodeStatus interface{}
