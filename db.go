@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -96,7 +97,7 @@ func (db *database) putDayShare(login string, diff int64) {
 func (db *database) putTmpShare(login, agent string, diff int64) {
 	z := redis.Z{
 		Score:  float64(time.Now().UnixNano()),
-		Member: diff,
+		Member: strconv.FormatInt(diff, 10) + ":" + strconv.FormatInt(time.Now().Unix(), 10),
 	}
 	err := db.client.ZAdd("tmp:"+login+":"+agent, z)
 	if err != nil {
@@ -153,7 +154,12 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 	dayRevenues, _ := db.client.ZRangeWithScores("revenue:"+login, int64(dateStart), int64(dateEnd)).Result()
 	table := make(map[string]interface{})
 	for _, z := range dayRevenues {
-		table[strconv.FormatInt(int64(z.Score), 10)] = z.Member
+		str, _ := z.Member.(string)
+		l := strings.Split(str, ":")
+		if len(li) < 2 {
+			continue
+		}
+		table[strconv.FormatInt(int64(z.Score), 10)] = l[0]
 	}
 
 	rtn["revenues"] = table
@@ -177,7 +183,11 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 	l, _ := db.client.ZRange("tmp:"+login+":"+agent, time.Now().UnixNano()-10*time.Minute.Nanoseconds(), time.Now().UnixNano()).Result()
 	var sum int64
 	for _, str := range l {
-		i, err := strconv.Atoi(str)
+		li := strings.Split(str, ":")
+		if len(li) < 2 {
+			continue
+		}
+		i, err := strconv.Atoi(li[0])
 		if err != nil {
 			logger.Error(err)
 		}
@@ -247,7 +257,7 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 		date, _ := strconv.ParseFloat(time.Now().Format("20190102"), 10)
 		z := redis.Z{
 			Score:  date,
-			Member: allMinersSharesTable[miner],
+			Member: strconv.FormatUint(allMinersSharesTable[miner], 10) + ":" + strconv.FormatInt(int64(date), 10),
 		}
 		db.client.ZAdd("revenue:"+miner, z)
 	}
