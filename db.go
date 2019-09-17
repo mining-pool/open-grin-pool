@@ -99,7 +99,7 @@ func (db *database) putTmpShare(login, agent string, diff int64) {
 		Score:  float64(time.Now().UnixNano()),
 		Member: strconv.FormatInt(diff, 10) + ":" + strconv.FormatInt(time.Now().Unix(), 10),
 	}
-	err := db.client.ZAdd("tmp:"+login+":"+agent, z)
+	_, err := db.client.ZAdd("tmp:"+login+":"+agent, z).Result()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -259,7 +259,10 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 			Score:  date,
 			Member: strconv.FormatUint(allMinersSharesTable[miner], 10) + ":" + strconv.FormatInt(int64(date), 10),
 		}
-		db.client.ZAdd("revenue:"+miner, z)
+		_, err := db.client.ZAdd("revenue:"+miner, z).Result()
+		if err != nil {
+			logger.Error(err)
+		}
 	}
 
 	db.client.HMSet("lastDayRevenue", allMinersRevenueTable)
