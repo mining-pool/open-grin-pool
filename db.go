@@ -169,7 +169,8 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 		status["realtime_hashrate"] = realtimeHashrate
 	}
 
-	l, err := db.client.ZRangeWithScores("tmp:"+login+":"+agent, time.Now().UnixNano()-10*time.Minute.Nanoseconds(), time.Now().UnixNano()).Result()
+	db.client.ZRemRangeByScore("tmp:"+login+":"+agent, "-inf", fmt.Sprint("(", time.Now().UnixNano()-10*time.Minute.Nanoseconds()))
+	l, err := db.client.ZRangeWithScores("tmp:"+login+":"+agent, 0, -1).Result()
 	if err != nil {
 		logger.Error(err)
 	}

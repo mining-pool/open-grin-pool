@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
+    <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="[bugFix]">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/js/miner.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/miner.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/miner.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/miner.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -135,7 +134,6 @@
     <MESSAGE value="[bugFix] excess json parse in js" />
     <MESSAGE value="[bugFix] keep compatibility with epic and grin" />
     <MESSAGE value="[update] more toleration" />
-    <MESSAGE value="[bugFix]" />
     <MESSAGE value="[bugFix] payer may produce fatal exit" />
     <MESSAGE value="[update] intro average hashrate" />
     <MESSAGE value="[update] revenue table for user" />
@@ -148,7 +146,8 @@
     <MESSAGE value="[update] travis" />
     <MESSAGE value="[bugFix] for in JS" />
     <MESSAGE value="[add] add TotalRHS on Web" />
-    <option name="LAST_COMMIT_MESSAGE" value="[add] add TotalRHS on Web" />
+    <MESSAGE value="[bugFix]" />
+    <option name="LAST_COMMIT_MESSAGE" value="[bugFix]" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

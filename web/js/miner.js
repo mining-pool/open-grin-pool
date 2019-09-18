@@ -10,7 +10,7 @@ xhr.onload = function () {
 
         agents = document.getElementById("agents");
 
-        let average_hashrate, realtime_hashrate;
+        let average_hashrate, realtime_hashrate = 0;
 
         for (const agent in miner.agents) {
             let name_node = document.createElement("li");
@@ -24,12 +24,13 @@ xhr.onload = function () {
             realtime_hashrate = realtime_hashrate + miner.agents[agent].realtime_hashrate;
             node.appendChild(textnode);
 
-            agents.appendChild(node)
+            agents.appendChild(node);
+
+            console.log(miner.agents[agent].average_hashrate);
+            console.log(miner.agents[agent].realtime_hashrate);
+            document.getElementById("totalAHS").innerText = (average_hashrate / 1000) + " kh/s";
+            document.getElementById("totalRHS").innerText = (realtime_hashrate / 1000) + " kh/s";
         }
-
-        document.getElementById("totalAHS").innerText = (average_hashrate / 1000) + "kh/s";
-        document.getElementById("totalRHS").innerText = (realtime_hashrate / 1000) + "kh/s";
-
     } else {
         console.log(xhr.response)
     }
