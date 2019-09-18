@@ -1,8 +1,16 @@
 language: go
-
 go:
 - master
-
 script:
- - go test -v ./...
- - go build -v .
+  - go test -v ./...
+  - go build -v .
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: RuWUXgwa/12u+9eDzW0bve3L7mQgOxQAVaPGzTBceulgZoSzivIROa6no9Q/jbQ101BJGSJiIs31v4/uIkqcmjlEWT1WKrYwF6lU+0f3T5coqV0SxPez+ecQIqnIdCRIw3mj6cu042CSFmc8u6aqPqh+3p0R7Ns31XmlHXEYQ68ktvzFrdNw2qHUo09D8xycWpfspF8Xw6uWQP/6hYtClCNNrjMEjoNKfdYZ3obtR4V1cSgu27FG8IzPzPAFEBmxlYitNQ4CWPbWapzNC6NA/l3qwHzYtzZ0S5ntewMm2XMjaeWEpzXZrTD34gBHV2EwCosz7xOtCtCSdxWxXRUMaoiTVqPyo4LOuMp4PVR3k+LIIz4XlAnPjpJGQ/vtItQyZTuA0Uy7hnU3zBAXXvPQnLdus5vPC6gjd6f7VISCOtkFi4V0Rx6QWPHBXX1Z0xP7llwVwefIyGNkDOzAQd427EuKHoGveoTyUnHqNU6mViTY+yAk1R6EQEsPhCOdbfWg8ZMC2vnGKI/IRRjS6uv8VXNO0/Xg8ZosFbwy7ckn0+VQBycEZ+ZE2z1uh9OU8wySlBoNdcQPk2IS4R8YLYHQ552PrYTJKodse9+YBJA7C7SWdmfr+lOyb0wE9EDQocgpwTD9i6VNVrGE2rhVG5QpKTPsCvj4voPoSDL5iNpS1GM=
+  file:
+    - "open-grin-pool"
+    - "config.json"
+  on:
+    repo: maoxs2/open-grin-pool
