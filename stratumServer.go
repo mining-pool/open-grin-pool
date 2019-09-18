@@ -8,6 +8,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/google/logger"
@@ -134,6 +135,12 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		err := dec.Decode(&jsonRaw)
 		if err != nil {
 			logger.Error(err)
+			opErr, ok := err.(*net.OpError)
+			if ok {
+				if opErr.Err.Error() == syscall.ECONNRESET.Error() {
+					return
+				}
+			}
 		}
 
 		err = json.Unmarshal(jsonRaw, &clientReq)
