@@ -134,12 +134,13 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 		err := dec.Decode(&jsonRaw)
 		if err != nil {
-			logger.Error(err)
 			opErr, ok := err.(*net.OpError)
 			if ok {
 				if opErr.Err.Error() == syscall.ECONNRESET.Error() {
 					return
 				}
+			} else {
+				logger.Error(err)
 			}
 		}
 
@@ -207,7 +208,14 @@ func relay2Node(nc *nodeClient, data json.RawMessage) {
 	enc := json.NewEncoder(nc.c)
 	err := enc.Encode(data)
 	if err != nil {
-		logger.Error(err)
+		opErr, ok := err.(*net.OpError)
+		if ok {
+			if opErr.Err.Error() == "use of closed network connection" {
+				return
+			}
+		} else {
+			logger.Error(err)
+		}
 	}
 }
 
