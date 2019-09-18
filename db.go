@@ -114,13 +114,6 @@ func (db *database) getShares() map[string]string {
 	return shares
 }
 
-func (db *database) putMinerStatus(login string, statusTable map[string]interface{}) {
-	_, err := db.client.HMSet("user:"+login, statusTable).Result()
-	if err != nil {
-		logger.Error(err)
-	}
-}
-
 func (db *database) getMinerStatus(login string) map[string]interface{} {
 	m, err := db.client.HGetAll("user:" + login).Result()
 	if err != nil {
@@ -128,29 +121,16 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 	}
 
 	rtn := make(map[string]interface{})
-	var totalAverageHS int64
-	var totalRealtimeHS int64
-
 	for k, v := range m {
 		if k == "agents" {
 			var agents map[string]interface{}
 			_ = json.Unmarshal([]byte(v), &agents)
 
-			for _, agentStatus := range agents {
-				s := agentStatus.(map[string]interface{})
-				ahs, _ := s["average_hashrate"].(int64)
-				rhs, _ := s["realtime_hashrate"].(int64)
-				totalAverageHS = totalAverageHS + ahs
-				totalRealtimeHS = totalRealtimeHS + rhs
-			}
 			rtn["agents"] = agents
 		} else {
 			rtn[k] = v
 		}
 	}
-
-	rtn["average_hashrate"] = totalAverageHS
-	rtn["realtime_hashrate"] = totalRealtimeHS
 
 	monthStartDay := time.Date(time.Now().Year(), time.Now().Month(), 0, 0, 0, 0, 0, time.Now().Location())
 	dateStart, _ := strconv.ParseFloat(monthStartDay.Format("20190102"), 10)
@@ -189,17 +169,15 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 		status["realtime_hashrate"] = realtimeHashrate
 	}
 
-	l, err := db.client.ZRange("tmp:"+login+":"+agent, time.Now().UnixNano()-10*time.Minute.Nanoseconds(), time.Now().UnixNano()).Result()
+	l, err := db.client.ZRangeWithScores("tmp:"+login+":"+agent, time.Now().UnixNano()-10*time.Minute.Nanoseconds(), time.Now().UnixNano()).Result()
 	if err != nil {
 		logger.Error(err)
 	}
 
 	var sum int64
-	for _, str := range l {
+	for _, z := range l {
+		str := z.Member.(string)
 		li := strings.Split(str, ":")
-		if len(li) < 2 {
-			continue
-		}
 		i, err := strconv.Atoi(li[0])
 		if err != nil {
 			logger.Error(err)

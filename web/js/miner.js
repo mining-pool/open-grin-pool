@@ -8,10 +8,9 @@ xhr.onload = function () {
     if (status === 200) {
         let miner = xhr.response;
 
-        document.getElementById("totalAHS").innerText = (miner.average_hashrate / 1000) + "kh/s";
-        document.getElementById("totalRHS").innerText = (miner.realtime_hashrate / 1000) + "kh/s";
-
         agents = document.getElementById("agents");
+
+        let average_hashrate, realtime_hashrate;
 
         for (const agent in miner.agents) {
             let name_node = document.createElement("li");
@@ -21,10 +20,16 @@ xhr.onload = function () {
 
             let node = document.createElement("li");
             let textnode = document.createTextNode(JSON.stringify(miner.agents[agent]));
+            average_hashrate = average_hashrate + miner.agents[agent].average_hashrate;
+            realtime_hashrate = realtime_hashrate + miner.agents[agent].realtime_hashrate;
             node.appendChild(textnode);
 
             agents.appendChild(node)
         }
+
+        document.getElementById("totalAHS").innerText = (average_hashrate / 1000) + "kh/s";
+        document.getElementById("totalRHS").innerText = (realtime_hashrate / 1000) + "kh/s";
+
     } else {
         console.log(xhr.response)
     }
