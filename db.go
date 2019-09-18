@@ -128,7 +128,8 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 	}
 
 	rtn := make(map[string]interface{})
-	var totalHS int64
+	var totalAverageHS int64
+	var totalRealtimeHS int64
 
 	for k, v := range m {
 		if k == "agents" {
@@ -137,8 +138,10 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 
 			for _, agentStatus := range agents {
 				s := agentStatus.(map[string]interface{})
-				hs, _ := s["average_hashrate"].(int64)
-				totalHS = totalHS + hs
+				ahs, _ := s["average_hashrate"].(int64)
+				rhs, _ := s["realtime_hashrate"].(int64)
+				totalAverageHS = totalAverageHS + ahs
+				totalRealtimeHS = totalRealtimeHS + rhs
 			}
 			rtn["agents"] = agents
 		} else {
@@ -146,7 +149,8 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 		}
 	}
 
-	rtn["hashrate"] = totalHS
+	rtn["average_hashrate"] = totalAverageHS
+	rtn["realtime_hashrate"] = totalRealtimeHS
 
 	monthStartDay := time.Date(time.Now().Year(), time.Now().Month(), 0, 0, 0, 0, 0, time.Now().Location())
 	dateStart, _ := strconv.ParseFloat(monthStartDay.Format("20190102"), 10)
@@ -185,7 +189,11 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 		status["realtime_hashrate"] = realtimeHashrate
 	}
 
-	l, _ := db.client.ZRange("tmp:"+login+":"+agent, time.Now().UnixNano()-10*time.Minute.Nanoseconds(), time.Now().UnixNano()).Result()
+	l, err := db.client.ZRange("tmp:"+login+":"+agent, time.Now().UnixNano()-10*time.Minute.Nanoseconds(), time.Now().UnixNano()).Result()
+	if err != nil {
+		logger.Error(err)
+	}
+
 	var sum int64
 	for _, str := range l {
 		li := strings.Split(str, ":")
@@ -238,11 +246,14 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 	newFileName := strconv.Itoa(time.Now().Year()) + "-" +
 		time.Now().Month().String() + "-" + strconv.Itoa(time.Now().Day())
 	f, err := os.Create(newFileName + ".csv")
+	if err != nil {
+		logger.Error(err)
+	}
 
 	var totalShare uint64
 	allMinersSharesTable := make(map[string]uint64)
 	for miner, shares := range allMinersStrSharesTable {
-		_, err = fmt.Fprintf(f, "%s %s\n", miner, shares)
+		_, _ = fmt.Fprintf(f, "%s %s\n", miner, shares)
 
 		allMinersSharesTable[miner], _ = strconv.ParseUint(shares, 10, 64)
 		totalShare = totalShare + allMinersSharesTable[miner]
@@ -250,14 +261,14 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 
 	// clean the share
 	db.client.HDel("share")
-	_, err = fmt.Fprintf(f, "\n")
+	_, _ = fmt.Fprintf(f, "\n")
 
 	allMinersRevenueTable := make(map[string]interface{})
 	for miner, shares := range allMinersSharesTable {
 		allMinersRevenueTable[miner] = shares / totalShare * totalRevenue
 
 		payment := db.client.HGet("user:"+miner, "payment")
-		_, err = fmt.Fprintf(f, "%s %d %s\n", miner, allMinersSharesTable[miner], payment)
+		_, _ = fmt.Fprintf(f, "%s %d %s\n", miner, allMinersSharesTable[miner], payment)
 
 		date, _ := strconv.ParseFloat(time.Now().Format("20190102"), 10)
 		z := redis.Z{

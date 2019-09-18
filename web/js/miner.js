@@ -8,15 +8,23 @@ xhr.onload = function () {
     if (status === 200) {
         let miner = xhr.response;
 
-        document.getElementById("ths").innerText = miner.hashrate;
+        document.getElementById("totalAHS").innerText = (miner.average_hashrate / 1000) + "kh/s";
+        document.getElementById("totalRHS").innerText = (miner.realtime_hashrate / 1000) + "kh/s";
+
         agents = document.getElementById("agents");
 
-        miner.agents.forEach(agent => {
+        for (const agent in miner.agents) {
+            let name_node = document.createElement("li");
+            let name_textnode = document.createTextNode(agent);
+            name_node.appendChild(name_textnode);
+            agents.appendChild(name_node);
+
             let node = document.createElement("li");
-            let textnode = document.createTextNode(JSON.stringify(agent));
+            let textnode = document.createTextNode(JSON.stringify(miner.agents[agent]));
             node.appendChild(textnode);
+
             agents.appendChild(node)
-        });
+        }
     } else {
         console.log(xhr.response)
     }
