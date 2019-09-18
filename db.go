@@ -172,13 +172,18 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 func (db *database) setMinerAgentStatus(login, agent string, diff int64, status map[string]interface{}) {
 	s, err := db.client.HGet("user:"+login, "agents").Result()
 	if err != nil {
-		logger.Error(err)
+		logger.Error("failed to get miner agent, redis answering", err, " maybe on initialization?")
 	}
 
 	strUnixNano, _ := db.client.HGet("user:"+login, "lastShare").Result()
 	lastShareTime, _ := strconv.ParseInt(strUnixNano, 10, 64)
-	realtimeHashrate := diff * 1e9 / (time.Now().UnixNano() - lastShareTime) / int64(db.conf.Node.BlockTime)
-	status["realtime_hashrate"] = realtimeHashrate
+	if time.Now().UnixNano() == lastShareTime {
+		realtimeHashrate := diff * 1e9 / (1) / int64(db.conf.Node.BlockTime)
+		status["realtime_hashrate"] = realtimeHashrate
+	} else {
+		realtimeHashrate := diff * 1e9 / (time.Now().UnixNano() - lastShareTime) / int64(db.conf.Node.BlockTime)
+		status["realtime_hashrate"] = realtimeHashrate
+	}
 
 	l, _ := db.client.ZRange("tmp:"+login+":"+agent, time.Now().UnixNano()-10*time.Minute.Nanoseconds(), time.Now().UnixNano()).Result()
 	var sum int64
