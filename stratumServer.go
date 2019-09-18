@@ -146,7 +146,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 		err = json.Unmarshal(jsonRaw, &clientReq)
 		if err != nil {
-			logger.Error(err)
+			// logger.Error(err)
 			continue
 		}
 
