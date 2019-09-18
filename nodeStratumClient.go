@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net"
-	"strconv"
 
 	"github.com/google/logger"
 )
@@ -12,18 +11,26 @@ import (
 type nodeClient struct {
 	c   net.Conn
 	enc *json.Encoder
+	dec *json.Decoder
 }
 
 func initNodeStratumClient(conf *config) *nodeClient {
-	conn, err := net.Dial("tcp4", conf.Node.Address+":"+strconv.Itoa(conf.Node.StratumPort))
+	ip := net.ParseIP(conf.Node.Address)
+	raddr := &net.TCPAddr{
+		IP:   ip,
+		Port: conf.Node.StratumPort,
+	}
+	conn, err := net.DialTCP("tcp4", nil, raddr)
 	if err != nil {
 		logger.Error(err)
 	}
 
 	enc := json.NewEncoder(conn)
+	dec := json.NewDecoder(conn)
 	nc := &nodeClient{
 		c:   conn,
 		enc: enc,
+		dec: dec,
 	}
 
 	return nc
@@ -31,8 +38,6 @@ func initNodeStratumClient(conf *config) *nodeClient {
 
 // registerHandler will hook the callback function to the tcp conn, and call func when recv
 func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json.RawMessage)) {
-	dec := json.NewDecoder(nc.c)
-
 	for {
 		select {
 		case <-ctx.Done():
@@ -40,7 +45,7 @@ func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json
 		default:
 			var sr json.RawMessage
 
-			err := dec.Decode(&sr)
+			err := nc.dec.Decode(&sr)
 			if err != nil {
 				logger.Error(err)
 				return

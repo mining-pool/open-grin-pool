@@ -210,9 +210,12 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 }
 
 func initStratumServer(db *database, conf *config) {
-	ln, err := net.Listen("tcp",
-		conf.StratumServer.Address+":"+strconv.Itoa(conf.StratumServer.Port),
-	)
+	ip := net.ParseIP(conf.StratumServer.Address)
+	addr := &net.TCPAddr{
+		IP:   ip,
+		Port: conf.StratumServer.Port,
+	}
+	ln, err := net.ListenTCP("tcp", addr)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -228,7 +231,7 @@ func initStratumServer(db *database, conf *config) {
 	//go ss.backupPerInterval()
 
 	for {
-		conn, err := ln.Accept()
+		conn, err := ln.AcceptTCP()
 		if err != nil {
 			logger.Error(err)
 		}

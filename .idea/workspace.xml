@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="[update] format">
+    <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nodeStratumClient.go" beforeDir="false" afterPath="$PROJECT_DIR$/nodeStratumClient.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stratumServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/stratumServer.go" afterDir="false" />
     </list>
