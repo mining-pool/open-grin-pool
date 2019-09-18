@@ -66,7 +66,7 @@ func (ms *minerSession) handleMethod(res *stratumResponse, db *database) {
 		detail, ok := res.Result.(string)
 		logger.Info(ms.login, " has submit a ", detail, " share")
 		if ok {
-			if strings.Contains(detail, "block - ") {
+			if strings.Contains(detail, "block") {
 				blockHash := strings.Trim(detail, "block - ")
 				db.putBlockHash(blockHash)
 				logger.Warning("block ", blockHash, " has been found by ", ms.login)
@@ -144,6 +144,10 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			}
 		}
 
+		if len(jsonRaw) == 0 {
+			return
+		}
+
 		err = json.Unmarshal(jsonRaw, &clientReq)
 		if err != nil {
 			// logger.Error(err)
@@ -193,29 +197,14 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			session.login = login
 			session.agent = agent
 			logger.Info(session.login, "'s ", agent, " has logged in")
-			go relay2Node(nc, jsonRaw)
+			_ = nc.enc.Encode(jsonRaw)
 
 		default:
 			if session.hasNotLoggedIn() {
 				logger.Warning(login, " has not logged in")
 			}
 
-			go relay2Node(nc, jsonRaw)
-		}
-	}
-}
-
-func relay2Node(nc *nodeClient, data json.RawMessage) {
-	enc := json.NewEncoder(nc.c)
-	err := enc.Encode(data)
-	if err != nil {
-		opErr, ok := err.(*net.OpError)
-		if ok {
-			if opErr.Err.Error() == "use of closed network connection" {
-				return
-			}
-		} else {
-			logger.Error(err)
+			_ = nc.enc.Encode(jsonRaw)
 		}
 	}
 }

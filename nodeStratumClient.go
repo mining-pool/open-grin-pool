@@ -10,7 +10,8 @@ import (
 )
 
 type nodeClient struct {
-	c net.Conn
+	c   net.Conn
+	enc *json.Encoder
 }
 
 func initNodeStratumClient(conf *config) *nodeClient {
@@ -19,8 +20,10 @@ func initNodeStratumClient(conf *config) *nodeClient {
 		logger.Error(err)
 	}
 
+	enc := json.NewEncoder(conn)
 	nc := &nodeClient{
-		c: conn,
+		c:   conn,
+		enc: enc,
 	}
 
 	return nc
@@ -28,7 +31,6 @@ func initNodeStratumClient(conf *config) *nodeClient {
 
 // registerHandler will hook the callback function to the tcp conn, and call func when recv
 func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json.RawMessage)) {
-	defer nc.c.Close()
 	dec := json.NewDecoder(nc.c)
 
 	for {
