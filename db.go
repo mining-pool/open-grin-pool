@@ -97,7 +97,7 @@ func (db *database) putDayShare(login string, diff int64) {
 func (db *database) putTmpShare(login, agent string, diff int64) {
 	z := redis.Z{
 		Score:  float64(time.Now().UnixNano()),
-		Member: strconv.FormatInt(diff, 10) + ":" + strconv.FormatInt(time.Now().Unix(), 10),
+		Member: strconv.FormatInt(diff, 10) + ":" + strconv.FormatInt(time.Now().UnixNano(), 16),
 	}
 	_, err := db.client.ZAdd("tmp:"+login+":"+agent, z).Result()
 	if err != nil {
@@ -161,11 +161,12 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 
 	strUnixNano, _ := db.client.HGet("user:"+login, "lastShare").Result()
 	lastShareTime, _ := strconv.ParseInt(strUnixNano, 10, 64)
+	// H = D / ΔT
 	if time.Now().UnixNano() == lastShareTime {
-		realtimeHashrate := diff * 1e9 / (1) / int64(db.conf.Node.BlockTime)
+		realtimeHashrate := float64(diff*1e9) / (1)
 		status["realtime_hashrate"] = realtimeHashrate
 	} else {
-		realtimeHashrate := diff * 1e9 / (time.Now().UnixNano() - lastShareTime) / int64(db.conf.Node.BlockTime)
+		realtimeHashrate := float64(diff*1e9) / float64(time.Now().UnixNano()-lastShareTime)
 		status["realtime_hashrate"] = realtimeHashrate
 	}
 
@@ -185,7 +186,7 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 		}
 		sum = sum + int64(i)
 	}
-	averageHashrate := sum * 1e9 / (10 * time.Minute.Nanoseconds()) / int64(db.conf.Node.BlockTime)
+	averageHashrate := float64(sum*1e9) / float64(10*time.Minute.Nanoseconds())
 	status["average_hashrate"] = averageHashrate
 
 	agents := make(map[string]interface{})
@@ -246,7 +247,7 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 	for miner, shares := range allMinersSharesTable {
 		allMinersRevenueTable[miner] = shares / totalShare * totalRevenue
 
-		payment := db.client.HGet("user:"+miner, "payment")
+		payment, _ := db.client.HGet("user:"+miner, "payment").Result()
 		_, _ = fmt.Fprintf(f, "%s %d %s\n", miner, allMinersSharesTable[miner], payment)
 
 		date, _ := strconv.ParseFloat(time.Now().Format("20190102"), 10)
