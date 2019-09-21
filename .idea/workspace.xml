@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="[bugFix] hashrate calculation and payment export">
-      <change afterPath="$PROJECT_DIR$/db_test.go" afterDir="false" />
+    <list default="true" id="d0e16f59-d4d2-485d-aea5-45b78e33aa5b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -52,6 +49,7 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="SET_USER_NAME_GLOBALLY" value="false" />
   </component>
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
@@ -134,7 +132,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
-    <MESSAGE value="[bugFix?] share calculation" />
     <MESSAGE value="[add] payer.Fee and the payment field in exported revenue table" />
     <MESSAGE value="[add] multi agent support" />
     <MESSAGE value="[optimize] multi agent status json" />
@@ -159,7 +156,8 @@
     <MESSAGE value="[bugFix] for in JS" />
     <MESSAGE value="[add] add TotalRHS on Web" />
     <MESSAGE value="[bugFix]" />
-    <option name="LAST_COMMIT_MESSAGE" value="[bugFix]" />
+    <MESSAGE value="[bugFix] hashrate calculation and payment export" />
+    <option name="LAST_COMMIT_MESSAGE" value="[bugFix] hashrate calculation and payment export" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

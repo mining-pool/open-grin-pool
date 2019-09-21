@@ -245,15 +245,16 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 
 	allMinersRevenueTable := make(map[string]interface{})
 	for miner, shares := range allMinersSharesTable {
-		allMinersRevenueTable[miner] = shares / totalShare * totalRevenue
+		revenue := shares / totalShare * totalRevenue
+		allMinersRevenueTable[miner] = revenue
 
 		payment, _ := db.client.HGet("user:"+miner, "payment").Result()
-		_, _ = fmt.Fprintf(f, "%s %d %s\n", miner, allMinersSharesTable[miner], payment)
+		_, _ = fmt.Fprintf(f, "%s %d %s\n", miner, revenue, payment)
 
 		date, _ := strconv.ParseFloat(time.Now().Format("20190102"), 10)
 		z := redis.Z{
 			Score:  date,
-			Member: strconv.FormatUint(allMinersSharesTable[miner], 10) + ":" + strconv.FormatInt(int64(date), 10),
+			Member: strconv.FormatUint(revenue, 10) + ":" + strconv.FormatInt(int64(date), 10),
 		}
 		_, err := db.client.ZAdd("revenue:"+miner, z).Result()
 		if err != nil {
