@@ -240,7 +240,10 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 	}
 
 	// clean the share
-	db.client.HDel("share")
+	_, err = db.client.HDel("share").Result()
+	if err != nil {
+		logger.Error(err)
+	}
 	_, _ = fmt.Fprintf(f, "\n")
 
 	allMinersRevenueTable := make(map[string]interface{})

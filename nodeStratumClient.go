@@ -3,15 +3,17 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net"
 
 	"github.com/google/logger"
 )
 
 type nodeClient struct {
-	c   net.Conn
-	enc *json.Encoder
-	dec *json.Decoder
+	conf *config
+	c    net.Conn
+	enc  *json.Encoder
+	dec  *json.Decoder
 }
 
 func initNodeStratumClient(conf *config) *nodeClient {
@@ -28,9 +30,10 @@ func initNodeStratumClient(conf *config) *nodeClient {
 	enc := json.NewEncoder(conn)
 	dec := json.NewDecoder(conn)
 	nc := &nodeClient{
-		c:   conn,
-		enc: enc,
-		dec: dec,
+		conf: conf,
+		c:    conn,
+		enc:  enc,
+		dec:  dec,
 	}
 
 	return nc
@@ -48,7 +51,12 @@ func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json
 			err := nc.dec.Decode(&sr)
 			if err != nil {
 				logger.Error(err)
-				return
+				if err == io.EOF {
+					if nc.reconnect() != nil {
+						return
+					}
+				}
+				continue
 			}
 
 			resp, _ := sr.MarshalJSON()
@@ -57,6 +65,25 @@ func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json
 			go callback(sr)
 		}
 	}
+}
+
+func (nc *nodeClient) reconnect() error {
+	ip := net.ParseIP(nc.conf.Node.Address)
+	raddr := &net.TCPAddr{
+		IP:   ip,
+		Port: nc.conf.Node.StratumPort,
+	}
+	conn, err := net.DialTCP("tcp4", nil, raddr)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	nc.c = conn
+	nc.enc = json.NewEncoder(conn)
+	nc.dec = json.NewDecoder(conn)
+
+	return nil
 }
 
 func (nc *nodeClient) close() {
