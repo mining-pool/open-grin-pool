@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9bdc0910-8d5e-4927-884b-19805f6d7390" name="Default Changelist" comment="[bugFix] suppress the EOF">
+    <list default="true" id="9bdc0910-8d5e-4927-884b-19805f6d7390" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/db_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nodeStratumClient.go" beforeDir="false" afterPath="$PROJECT_DIR$/nodeStratumClient.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stratumServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/stratumServer.go" afterDir="false" />
     </list>
@@ -67,7 +68,8 @@
     <option name="SHOW_UNVERSIONED_FILES_WHILE_COMMIT" value="false" />
     <MESSAGE value="[update] exclude stale shares" />
     <MESSAGE value="[update] add multi algo, improve json speed" />
-    <option name="LAST_COMMIT_MESSAGE" value="[update] add multi algo, improve json speed" />
+    <MESSAGE value="[bugFix] suppress the EOF" />
+    <option name="LAST_COMMIT_MESSAGE" value="[bugFix] suppress the EOF" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

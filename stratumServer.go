@@ -4,7 +4,6 @@ package main
 import (
 	"bufio"
 	"context"
-	"io"
 	"math/rand"
 	"net"
 	"strconv"
@@ -130,15 +129,11 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 	go callStatusPerInterval(ctx, nc)
 
-	go nc.registerHandler(ctx, func(sr jsoniter.RawMessage) {
+	go nc.registerHandler(ctx, func(raw []byte) {
 		w := bufio.NewWriter(conn)
-		b, err := json.Marshal(sr)
-		if err != nil {
-			logger.Error(err)
-		}
 
 		var msg JsonRPC
-		_ = json.Unmarshal(sr, &msg) // suppress the err
+		_ = json.Unmarshal(raw, &msg) // suppress the err
 		if msg.Method == "job" {
 			jobAlgo := msg.Params["algorithm"]
 			if ss.conf.StratumServer[ss.id].Algo != jobAlgo {
@@ -146,7 +141,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			}
 		}
 
-		_, err = w.Write(append(b, '\n'))
+		_, err := w.Write(append(raw, '\n'))
 		err = w.Flush()
 		if err != nil {
 			logger.Error(err)
@@ -158,7 +153,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 		// internal record
 		var res stratumResponse
-		_ = json.Unmarshal(sr, &res)
+		_ = json.Unmarshal(raw, &res)
 		session.handleMethod(&res, ss.db)
 	})
 	defer nc.close()
@@ -166,22 +161,23 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 	for {
 		var clientReq stratumRequest
 
-		raw, err := nc.rw.ReadBytes('\n')
-		if err != nil {
-			if err == io.EOF {
-				continue
-			}
-			opErr, ok := err.(*net.OpError)
+		raw := nc.s.Bytes()
+		if nc.s.Err() != nil {
+			opErr, ok := nc.s.Err().(*net.OpError)
 			if ok {
 				if opErr.Err.Error() == syscall.ECONNRESET.Error() {
 					return
 				}
 			} else {
-				logger.Error(err)
+				logger.Error(nc.s.Err())
 			}
 		}
 
-		err = json.Unmarshal(raw, &clientReq)
+		if len(raw) == 0 {
+			continue
+		}
+
+		err := json.Unmarshal(raw, &clientReq)
 		if err != nil {
 			continue
 		}
@@ -190,11 +186,19 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 		switch clientReq.Method {
 		case "login":
-			login, _ = clientReq.Params["login"].(string)
-
+			var ok bool
+			login, ok = clientReq.Params["login"].(string)
+			if !ok {
+				logger.Error("failed to parse login")
+			}
 			pass, _ := clientReq.Params["pass"].(string)
-
+			if !ok {
+				logger.Error("failed to parse pass")
+			}
 			agent, _ := clientReq.Params["agent"].(string)
+			if !ok {
+				logger.Error("failed to parse agent")
+			}
 
 			login = strings.TrimSpace(login)
 			pass = strings.TrimSpace(pass)
@@ -229,14 +233,14 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			session.login = login
 			session.agent = agent
 			logger.Info(session.login, "'s ", agent, " has logged in")
-			nc.Encode(raw)
+			nc.Write(raw)
 
 		default:
 			if session.hasNotLoggedIn() {
 				logger.Warning(login, " has not logged in")
 			}
 
-			nc.Encode(raw)
+			nc.Write(raw)
 		}
 	}
 }
