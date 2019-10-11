@@ -1,19 +1,20 @@
 package main
 
 import (
-	"bufio"
 	"context"
+	"io"
 	"net"
 	"sync"
 
 	"github.com/google/logger"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type nodeClient struct {
 	conf *config
 	conn net.Conn
-	w    *bufio.Writer
-	s    *bufio.Scanner
+	enc  *jsoniter.Encoder
+	dec  *jsoniter.Decoder
 	mu   sync.Mutex
 }
 
@@ -28,75 +29,43 @@ func initNodeStratumClient(conf *config) *nodeClient {
 		logger.Error(err)
 	}
 
-	w := bufio.NewWriter(conn)
-	s := bufio.NewScanner(bufio.NewReader(conn))
+	enc := json.NewEncoder(conn)
+	dec := json.NewDecoder(conn)
 
 	nc := &nodeClient{
 		conf: conf,
 		conn: conn,
-		w:    w,
-		s:    s,
+		enc:  enc,
+		dec:  dec,
 	}
 
 	return nc
 }
 
 // registerHandler will hook the callback function to the tcp conn, and call func when recv
-func (nc *nodeClient) registerHandler(ctx context.Context, callback func(raw []byte)) {
+func (nc *nodeClient) registerHandler(ctx context.Context, callback func(jRpc JsonRPC)) {
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			raw := nc.s.Bytes()
-			//if err != nil {
-			//	if err == io.EOF {
-			//		continue
-			//	} else {
-			//		if nc.reconnect() != nil {
-			//			return
-			//		}
-			//	}
-			//	continue
-			//}
-			logger.Info("Node returns a response: ", string(raw))
-
-			go callback(raw)
-			if nc.s.Err() != nil {
-				logger.Error(nc.s.Err())
-				if nc.reconnect() != nil {
-					return
+			var jRpc JsonRPC
+			err := nc.dec.Decode(&jRpc)
+			if err != nil {
+				if err == io.EOF {
+					continue
+				} else {
+					if nc.reconnect() != nil {
+						return
+					}
 				}
 				continue
 			}
 
+			logger.Info("Node returns a response: ", jRpc.String())
+
+			go callback(jRpc)
 		}
-	}
-}
-
-func (nc *nodeClient) Send(req interface{}) {
-	raw, err := json.Marshal(req)
-	if err != nil {
-		logger.Error(err)
-	}
-	_, err = nc.w.Write(append(raw, '\n'))
-	if err != nil {
-		logger.Error(err)
-	}
-	err = nc.w.Flush()
-	if err != nil {
-		logger.Error(err)
-	}
-}
-
-func (nc *nodeClient) Write(raw []byte) {
-	_, err := nc.w.Write(append(raw, '\n'))
-	if err != nil {
-		logger.Error(err)
-	}
-	err = nc.w.Flush()
-	if err != nil {
-		logger.Error(err)
 	}
 }
 
@@ -116,12 +85,19 @@ func (nc *nodeClient) reconnect() error {
 	}
 
 	nc.conn = conn
-	nc.w = bufio.NewWriter(conn)
-	nc.s = bufio.NewScanner(conn)
+	nc.enc = json.NewEncoder(conn)
+	nc.dec = json.NewDecoder(conn)
 
 	return nil
 }
 
-func (nc *nodeClient) close() {
+func (nc *nodeClient) Close() {
 	_ = nc.conn.Close()
+}
+
+func (nc *nodeClient) Send(msg JsonRPC) {
+	err := nc.enc.Encode(&msg)
+	if err != nil {
+		logger.Error(err)
+	}
 }
