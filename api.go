@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -56,14 +55,21 @@ func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dec := json.NewDecoder(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		logger.Error(err)
+	}
 	var nodeStatus interface{}
-	_ = dec.Decode(&nodeStatus)
+	err = json.Unmarshal(body, &nodeStatus)
+	if err != nil {
+		logger.Error(err)
+	}
 
 	table := map[string]interface{}{
 		"node_status":  nodeStatus,
 		"mined_blocks": blockBatch,
 	}
+
 	raw, err := json.Marshal(table)
 	if err != nil {
 		logger.Error(err)

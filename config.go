@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	"io/ioutil"
 	"os"
 
 	"github.com/google/logger"
@@ -13,7 +13,8 @@ type config struct {
 		SystemLog bool   `json:"system_log"`
 		LogFile   string `json:"log_file"`
 	} `json:"log"`
-	StratumServer struct {
+	StratumServer []struct {
+		Algo           string `json:"algo"`
 		Address        string `json:"address"`
 		Port           int    `json:"port"`
 		BackupInterval string `json:"backup_interval"`
@@ -58,8 +59,8 @@ func parseConfig() *config {
 	}
 
 	var conf config
-	dec := json.NewDecoder(f)
-	err = dec.Decode(&conf)
+	b, _ := ioutil.ReadAll(f)
+	err = json.Unmarshal(b, &conf)
 	if err != nil {
 		logger.Fatal(err)
 	}

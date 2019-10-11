@@ -18,7 +18,9 @@ func main() {
 	db := initDB(conf)
 
 	go initAPIServer(db, conf)
-	go initStratumServer(db, conf)
+	for i := 0; i < len(conf.StratumServer); i++ {
+		go initStratumServer(i, db, conf)
+	}
 	go initPayer(db, conf)
 	for {
 		select {}

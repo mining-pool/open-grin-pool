@@ -4,11 +4,26 @@
     "system_log": false,
     "log_file": "pool.log"
   },
-  "stratum_server": {
-    "address": "0.0.0.0",
-    "port": 3344,
-    "backup_interval": "6h"
-  },
+  "stratum_server": [
+    {
+      "algo": "randomx",
+      "address": "0.0.0.0",
+      "port": 3344,
+      "backup_interval": "6h"
+    },
+    {
+      "algo": "cuckoo",
+      "address": "0.0.0.0",
+      "port": 4455,
+      "backup_interval": "6h"
+    },
+    {
+      "algo": "progpow",
+      "address": "0.0.0.0",
+      "port": 5566,
+      "backup_interval": "6h"
+    }
+  ],
   "api_server": {
     "address": "0.0.0.0",
     "port": 3333,

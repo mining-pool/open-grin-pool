@@ -2,8 +2,8 @@ package main
 
 // http rpc server
 import (
+	"bufio"
 	"context"
-	"encoding/json"
 	"math/rand"
 	"net"
 	"strconv"
@@ -12,9 +12,13 @@ import (
 	"time"
 
 	"github.com/google/logger"
+	"github.com/json-iterator/go"
 )
 
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
 type stratumServer struct {
+	id   int
 	db   *database
 	ln   net.Listener
 	conf *config
@@ -25,6 +29,15 @@ type stratumRequest struct {
 	JsonRpc string                 `json:"jsonrpc"`
 	Method  string                 `json:"method"`
 	Params  map[string]interface{} `json:"params"`
+}
+
+type JsonRPC struct {
+	ID      string                 `json:"id"`
+	JsonRpc string                 `json:"jsonrpc"`
+	Method  string                 `json:"method"`
+	Result  interface{}            `json:"result, omitempty"`
+	Params  map[string]interface{} `json:"params, omitempty"`
+	Error   map[string]interface{} `json:"error, omitempty"`
 }
 
 type stratumResponse struct {
@@ -39,7 +52,9 @@ type minerSession struct {
 	login      string
 	agent      string
 	difficulty int64
-	ctx        context.Context
+
+	conf *config
+	ctx  context.Context
 }
 
 func (ms *minerSession) hasNotLoggedIn() bool {
@@ -85,15 +100,11 @@ func callStatusPerInterval(ctx context.Context, nc *nodeClient) {
 	}
 
 	ch := time.Tick(10 * time.Second)
-	enc := json.NewEncoder(nc.c)
 
 	for {
 		select {
 		case <-ch:
-			err := enc.Encode(statusReq)
-			if err != nil {
-				logger.Error(err)
-			}
+			nc.Send(statusReq)
 		case <-ctx.Done():
 			return
 		}
@@ -102,37 +113,59 @@ func callStatusPerInterval(ctx context.Context, nc *nodeClient) {
 
 func (ss *stratumServer) handleConn(conn net.Conn) {
 	logger.Info("new conn from ", conn.RemoteAddr())
-	session := &minerSession{difficulty: int64(ss.conf.Node.Diff)}
-	defer conn.Close()
-	var login string
-	nc := initNodeStratumClient(ss.conf)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	session := &minerSession{
+		difficulty: int64(ss.conf.Node.Diff),
+		conf:       ss.conf,
+		ctx:        ctx,
+	}
+
+	defer conn.Close()
+	var login string
+	nc := initNodeStratumClient(ss.conf)
+
 	go callStatusPerInterval(ctx, nc)
 
-	go nc.registerHandler(ctx, func(sr json.RawMessage) {
-		enc := json.NewEncoder(conn)
-		err := enc.Encode(sr)
+	go nc.registerHandler(ctx, func(sr jsoniter.RawMessage) {
+		w := bufio.NewWriter(conn)
+		b, err := json.Marshal(sr)
+		if err != nil {
+			logger.Error(err)
+		}
+
+		var msg JsonRPC
+		_ = json.Unmarshal(sr, &msg) // suppress the err
+		if msg.Method == "job" {
+			jobAlgo := msg.Params["algorithm"]
+			if ss.conf.StratumServer[ss.id].Algo != jobAlgo {
+				return
+			}
+		}
+
+		_, err = w.Write(append(b, '\n'))
+		err = w.Flush()
+		if err != nil {
+			logger.Error(err)
+		}
+
 		if err != nil {
 			logger.Error(err)
 		}
 
 		// internal record
 		var res stratumResponse
-		_ = json.Unmarshal(sr, &res) // suppress the err
-
+		_ = json.Unmarshal(sr, &res)
 		session.handleMethod(&res, ss.db)
 	})
 	defer nc.close()
 
-	dec := json.NewDecoder(conn)
 	for {
-		var jsonRaw json.RawMessage
 		var clientReq stratumRequest
 
-		err := dec.Decode(&jsonRaw)
+		raw, err := nc.rw.ReadBytes('\n')
 		if err != nil {
 			opErr, ok := err.(*net.OpError)
 			if ok {
@@ -144,17 +177,13 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			}
 		}
 
-		if len(jsonRaw) == 0 {
-			return
-		}
-
-		err = json.Unmarshal(jsonRaw, &clientReq)
+		err = json.Unmarshal(raw, &clientReq)
 		if err != nil {
 			// logger.Error(err)
 			continue
 		}
 
-		logger.Info(conn.RemoteAddr(), " sends a ", clientReq.Method, " request:", string(jsonRaw))
+		logger.Info(conn.RemoteAddr(), " sends a ", clientReq.Method, " request:", string(raw))
 
 		switch clientReq.Method {
 		case "login":
@@ -197,38 +226,37 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			session.login = login
 			session.agent = agent
 			logger.Info(session.login, "'s ", agent, " has logged in")
-			_ = nc.enc.Encode(jsonRaw)
+			nc.Encode(raw)
 
 		default:
 			if session.hasNotLoggedIn() {
 				logger.Warning(login, " has not logged in")
 			}
 
-			_ = nc.enc.Encode(jsonRaw)
+			nc.Encode(raw)
 		}
 	}
 }
 
-func initStratumServer(db *database, conf *config) {
-	ip := net.ParseIP(conf.StratumServer.Address)
+func initStratumServer(id int, db *database, conf *config) {
+	ip := net.ParseIP(conf.StratumServer[id].Address)
 	addr := &net.TCPAddr{
 		IP:   ip,
-		Port: conf.StratumServer.Port,
+		Port: conf.StratumServer[id].Port,
 	}
 	ln, err := net.ListenTCP("tcp", addr)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	logger.Warning("listening on ", conf.StratumServer.Port)
+	logger.Warning("listening on ", conf.StratumServer[id].Port)
 
 	ss := &stratumServer{
+		id:   id,
 		db:   db,
 		ln:   ln,
 		conf: conf,
 	}
-
-	//go ss.backupPerInterval()
 
 	for {
 		conn, err := ln.AcceptTCP()

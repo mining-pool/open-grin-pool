@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -25,14 +25,27 @@ func (p *payer) getNewBalance() uint64 {
 		return 0
 	}
 
-	dec := json.NewDecoder(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		logger.Error(err)
+	}
 	var summaryInfo []interface{}
-	_ = dec.Decode(&summaryInfo)
+	_ = json.Unmarshal(body, &summaryInfo)
 
-	i, _ := summaryInfo[1].(map[string]interface{})
-	strSpendable := i["amount_currently_spendable"].(string)
-	spendable, _ := strconv.Atoi(strSpendable)
-	return uint64(spendable) // unit nanogrin
+	i, ok := summaryInfo[1].(map[string]interface{})
+	if !ok {
+		logger.Error("failed to format summaryInfo")
+	}
+	strSpendable, ok := i["amount_currently_spendable"].(string)
+	if !ok {
+		logger.Error("failed to format amount_currently_spendable")
+	}
+	spendable, err := strconv.ParseUint(strSpendable, 10, 64)
+	if err != nil {
+		logger.Error(err)
+	}
+
+	return spendable // unit nanogrin
 }
 
 // distribute coins when balance is > 1e9 nano
