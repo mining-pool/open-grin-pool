@@ -49,11 +49,11 @@ func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json
 		default:
 			var sr jsoniter.RawMessage
 
-			//err := nc.dec.Decode(&sr)
 			raw, err := nc.rw.ReadBytes('\n')
 			if err != nil {
-				logger.Error(err)
 				if err == io.EOF {
+					continue
+				} else {
 					if nc.reconnect() != nil {
 						return
 					}

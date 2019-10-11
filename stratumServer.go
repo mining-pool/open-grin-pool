@@ -4,6 +4,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"io"
 	"math/rand"
 	"net"
 	"strconv"
@@ -167,6 +168,9 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 		raw, err := nc.rw.ReadBytes('\n')
 		if err != nil {
+			if err == io.EOF {
+				continue
+			}
 			opErr, ok := err.(*net.OpError)
 			if ok {
 				if opErr.Err.Error() == syscall.ECONNRESET.Error() {
@@ -179,7 +183,6 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 		err = json.Unmarshal(raw, &clientReq)
 		if err != nil {
-			// logger.Error(err)
 			continue
 		}
 
