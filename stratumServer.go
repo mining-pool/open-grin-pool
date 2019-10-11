@@ -128,7 +128,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			}
 		}
 
-		err := enc.Encode(&jRpc)
+		err := enc.Encode(jRpc)
 		if err != nil {
 			logger.Error(err)
 		}
@@ -213,14 +213,14 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			session.login = login
 			session.agent = agent
 			logger.Info(session.login, "'s ", agent, " has logged in")
-			_ = nc.enc.Encode(&clientReq)
+			_ = nc.enc.Encode(clientReq)
 
 		default:
 			if session.hasNotLoggedIn() {
 				logger.Warning(login, " has not logged in")
 			}
 
-			_ = nc.enc.Encode(&clientReq)
+			_ = nc.enc.Encode(clientReq)
 		}
 	}
 }

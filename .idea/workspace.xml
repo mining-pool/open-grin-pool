@@ -69,7 +69,8 @@
     <MESSAGE value="[update] add multi algo, improve json speed" />
     <MESSAGE value="[bugFix] suppress the EOF" />
     <MESSAGE value="[update] using scanner and remove jsoniter.RawMessage" />
-    <option name="LAST_COMMIT_MESSAGE" value="[update] using scanner and remove jsoniter.RawMessage" />
+    <MESSAGE value="[update] using Enc &amp; Dec" />
+    <option name="LAST_COMMIT_MESSAGE" value="[update] using Enc &amp; Dec" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

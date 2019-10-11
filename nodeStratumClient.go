@@ -29,7 +29,7 @@ func initNodeStratumClient(conf *config) *nodeClient {
 		logger.Error(err)
 	}
 
-	enc := json.NewEncoder(conn)
+	enc := json.NewEncoder(conn) // not thread safe
 	dec := json.NewDecoder(conn)
 
 	nc := &nodeClient{
@@ -96,7 +96,7 @@ func (nc *nodeClient) Close() {
 }
 
 func (nc *nodeClient) Send(msg JsonRPC) {
-	err := nc.enc.Encode(&msg)
+	err := nc.enc.Encode(msg)
 	if err != nil {
 		logger.Error(err)
 	}
