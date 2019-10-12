@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"io"
 	"net"
@@ -13,8 +14,8 @@ import (
 type nodeClient struct {
 	conf *config
 	conn net.Conn
-	enc  *jsoniter.Encoder
 	dec  *jsoniter.Decoder
+	w    *bufio.Writer
 	mu   sync.Mutex
 }
 
@@ -29,13 +30,12 @@ func initNodeStratumClient(conf *config) *nodeClient {
 		logger.Error(err)
 	}
 
-	enc := json.NewEncoder(conn) // not thread safe
 	dec := json.NewDecoder(conn)
-
+	w := bufio.NewWriter(conn)
 	nc := &nodeClient{
 		conf: conf,
 		conn: conn,
-		enc:  enc,
+		w:    w,
 		dec:  dec,
 	}
 
@@ -85,9 +85,8 @@ func (nc *nodeClient) reconnect() error {
 	}
 
 	nc.conn = conn
-	nc.enc = json.NewEncoder(conn)
 	nc.dec = json.NewDecoder(conn)
-
+	nc.w = bufio.NewWriter(conn)
 	return nil
 }
 
@@ -95,8 +94,16 @@ func (nc *nodeClient) Close() {
 	_ = nc.conn.Close()
 }
 
-func (nc *nodeClient) Send(msg JsonRPC) {
-	err := nc.enc.Encode(msg)
+func (nc *nodeClient) Encode(msg interface{}) {
+	raw, err := json.Marshal(msg)
+	if err != nil {
+		logger.Error(err)
+	}
+	_, err = nc.w.Write(raw)
+	if err != nil {
+		logger.Error(err)
+	}
+	err = nc.w.Flush()
 	if err != nil {
 		logger.Error(err)
 	}

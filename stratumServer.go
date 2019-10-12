@@ -14,7 +14,17 @@ import (
 	"github.com/json-iterator/go"
 )
 
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
+var json = jsoniter.Config{
+	IndentionStep:                 0,
+	MarshalFloatWith6Digits:       false,
+	EscapeHTML:                    true,
+	SortMapKeys:                   false,
+	UseNumber:                     false,
+	DisallowUnknownFields:         false,
+	OnlyTaggedField:               false,
+	ValidateJsonRawMessage:        true,
+	ObjectFieldMustBeSimpleString: false,
+}.Froze()
 
 type stratumServer struct {
 	id   int
@@ -27,9 +37,9 @@ type JsonRPC struct {
 	ID      string      `json:"id"`
 	JsonRpc string      `json:"jsonrpc"`
 	Method  string      `json:"method"`
-	Result  interface{} `json:"result, omitempty"`
-	Params  interface{} `json:"params, omitempty"`
-	Error   interface{} `json:"error, omitempty"`
+	Result  interface{} `json:"result"`
+	Params  interface{} `json:"params"`
+	Error   interface{} `json:"error"`
 }
 
 func (j JsonRPC) String() string {
@@ -93,7 +103,7 @@ func callStatusPerInterval(ctx context.Context, nc *nodeClient) {
 	for {
 		select {
 		case <-ch:
-			nc.Send(statusReq)
+			nc.Encode(statusReq)
 		case <-ctx.Done():
 			return
 		}
@@ -120,6 +130,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 	go nc.registerHandler(ctx, func(jRpc JsonRPC) {
 		enc := json.NewEncoder(conn)
+		// verify before sending to miner
 		if jRpc.Method == "job" {
 			if params, ok := jRpc.Params.(map[string]interface{}); ok {
 				if jobAlgo, ok := params["algorithm"].(string); ok && ss.conf.StratumServer[ss.id].Algo != jobAlgo {
@@ -128,6 +139,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 			}
 		}
 
+		// send server response to miner
 		err := enc.Encode(jRpc)
 		if err != nil {
 			logger.Error(err)
@@ -212,15 +224,15 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 			session.login = login
 			session.agent = agent
-			logger.Info(session.login, "'s ", agent, " has logged in")
-			_ = nc.enc.Encode(clientReq)
+			logger.Info(session.login, "'s ", session.agent, " has logged in")
+			nc.Encode(clientReq)
 
 		default:
 			if session.hasNotLoggedIn() {
 				logger.Warning(login, " has not logged in")
 			}
 
-			_ = nc.enc.Encode(clientReq)
+			nc.Encode(clientReq)
 		}
 	}
 }
