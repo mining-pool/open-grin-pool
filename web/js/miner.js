@@ -10,7 +10,7 @@ xhr.onload = function () {
 
         agents = document.getElementById("agents");
 
-        let average_hashrate, realtime_hashrate = 0;
+        let average_hashrate = 0, realtime_hashrate = 0;
 
         for (const agent in miner.agents) {
             let name_node = document.createElement("li");
