@@ -1,0 +1,37 @@
+body {
+  line-height: 1.7em;
+	letter-spacing: .5px;
+	background-color: #eee;
+	padding-top: 95px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #686868;
+}
+
+.l-box {
+    padding: 1em;
+}
+
+.infobox {
+	color: #bf9b30;
+    border: 1px solid #f3f4f2;
+	background-color: #f3f4f2;
+    box-shadow: 0 1px 10px rgba(0,0,0,.1);
+	font-size: 20px;
+    font-weight: bold;
+	padding-top: 15px;
+}
+
+.list {
+	padding-top: 0px;
+}
+
+.list-group-item {
+	background-color: #f3f4f2 !important;
+}
