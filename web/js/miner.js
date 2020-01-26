@@ -30,6 +30,7 @@ xhr.onload = function () {
             console.log(miner.agents[agent].realtime_hashrate);
             document.getElementById("totalAHS").innerText = (average_hashrate / 1000) + " kh/s";
             document.getElementById("totalRHS").innerText = (realtime_hashrate / 1000) + " kh/s";
+            document.getElementById("lastshare").innerText = miner.lastShare;
         }
     } else {
         console.log(xhr.response)
