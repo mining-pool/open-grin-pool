@@ -2,38 +2,84 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>OPEN-GRIN-POOL</title>
-    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css"
-          integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="OPEN-GRIN-POOl">    
+	<title>OPEN-GRIN-POOl</title>    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<link rel="stylesheet" href="css/main.css">
 </head>
-
 <body>
-<div class="pure-g">
-    <div class="pure-u-1-5"></div>
 
-    <div class="pure-u-3-5">
-        <h1><a href="https://github.com/maoxs2/open-grin-pool">OPEN-GRIN-POOL</a></h1>
-        <h2>Miner: <span id="login"></span></h2>
-        <div>
-            <span>Total Average Hashrate</span>
-            <div id="totalAHS"></div>
-            <span>Total Realtime Hashrate</span>
-            <div id="totalRHS"></div>
-            <span>Agents</span>
-            <div id="agents"></div>
-        </div>
+<nav class="navbar navbar-dark fixed-top bg-dark">
+  	<a class="navbar-brand" href="https://github.com/maoxs2/open-grin-pool">OPEN-GRIN-POOl</a>
+	<ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="index.html">Pool Dashboard</a>
+      </li>
+</ul>
+</nav>
 
-        <div>
-            <h2>Register Payment</h2>
-            <label for="pass">password</label><input type="text" id="pass">
-
-            <label for="pm">payment</label><input type="text" id="pm">
-        </div>
-    </div>
+<div class="container">
+	<h2>Miner: <span id="login"></span></h2>
+	<div class="row">
+    	<div class="col-sm l-box text-center"><div class="infobox"><h4>Total Average Hashrate</h4><p id="totalAHS"></p></div></div>
+      	<div class="col-sm l-box text-center"><div class="infobox"><h4>Total Realtime Hashrate</h4><p id="totalRHS"></p></div></div>
+    	<div class="col-sm l-box text-center"><div class="infobox"><h4>Last Share</h4><p id="lastshare"></p></div></div>
+	</div>
+	<div class="row">
+       	<div class="col-sm l-box text-center"><div class="infobox"><h4>Agents</h4><p id="agents"></p></div></div>
+    	<div class="col-sm l-box"><div class="infobox">
+    <table class="table">
+		<thead>
+    	<tr>
+    		<th scope="col">ID</th>	
+    		<th scope="col">Realtime Hs</th>  
+    		<th scope="col">AVG Hs</th>
+			<th scope="col">Height</th>      
+			<th scope="col">Diff</th>     
+    		<th scope="col">Accepted</th>
+    		<th scope="col">Stale</th>
+    		<th scope="col">Rejected</th>
+    	</tr>
+  		</thead>
+  		<tbody>
+    		<tr>
+			<td>#</td>
+			<td>#</td>
+			<td>#</td>
+			<td>#</td>
+			<td>#</td>
+			<td>#</td>
+			<td>#</td>
+			<td>#</td>
+    	</tr>
+		</tbody>
+	</table>
+        </div></div>
+	</div>
+	
+	<h2>Register Payment</h2>
+	<div class="row">
+		<div class="col-sm l-box"> 
+        	<div class="infobox">
+				<form>	
+				<div class="form-group row">
+					<label for="pm" class="col-sm-2 col-form-label">Payment</label>
+					<div class="col-sm-4">
+						<input class="form-control" type="text" id="pm">
+					</div>
+					<label for="pass" class="col-sm-2 col-form-label">Password</label>
+    				<div class="col-sm-4">
+        				<input class="form-control" type="password" id="pass">
+					</div>
+    			</div>
+				</form>
+        	</div>
+		</div>
+	</div>
 </div>
+
 
 <script src="/js/config.js"></script>
 <script src="/js/miner.js"></script>
