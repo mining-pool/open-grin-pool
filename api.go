@@ -40,12 +40,12 @@ func (as *apiServer) sharesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
-	var blockBatch []string
+	//var blockBatch []string
 	header := w.Header()
 	header.Set("Content-Type", "application/json")
 	header.Set("Access-Control-Allow-Origin", "*")
 
-	blockBatch = as.db.getAllBlockHashes()
+	//blockBatch = as.db.getAllBlockHashes()
 
 	req, _ := http.NewRequest("GET", "http://"+as.conf.Node.Address+":"+strconv.Itoa(as.conf.Node.APIPort)+"/v1/status", nil)
 	req.SetBasicAuth(as.conf.Node.AuthUser, as.conf.Node.AuthPass)
@@ -61,8 +61,8 @@ func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 	_ = dec.Decode(&nodeStatus)
 
 	table := map[string]interface{}{
-		"node_status":  nodeStatus,
-		"mined_blocks": blockBatch,
+		"node_status": nodeStatus,
+		//"mined_blocks": blockBatch,
 	}
 	raw, err := json.Marshal(table)
 	if err != nil {
@@ -123,6 +123,23 @@ func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(raw)
 }
 
+func (as *apiServer) blocksHandler(w http.ResponseWriter, r *http.Request) {
+	var raw []byte
+
+	header := w.Header()
+	header.Set("Content-Type", "application/json")
+	header.Set("Access-Control-Allow-Origin", "*")
+
+	blocks := as.db.getAllMinedBlockHashes()
+	raw, err := json.Marshal(blocks)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	_, _ = w.Write(raw)
+}
+
 func initAPIServer(db *database, conf *config) {
 	as := &apiServer{
 		db:   db,
@@ -134,6 +151,7 @@ func initAPIServer(db *database, conf *config) {
 	r.HandleFunc("/miner/{miner_login}", as.minerHandler)
 	r.HandleFunc("/revenue", as.revenueHandler)
 	r.HandleFunc("/shares", as.sharesHandler)
+	r.HandleFunc("/blocks", as.blocksHandler)
 	http.Handle("/", r)
 	go logger.Fatal(
 		http.ListenAndServe(conf.APIServer.Address+":"+strconv.Itoa(conf.APIServer.Port), nil))

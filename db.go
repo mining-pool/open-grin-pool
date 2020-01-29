@@ -133,8 +133,8 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 	}
 
 	monthStartDay := time.Date(time.Now().Year(), time.Now().Month(), 0, 0, 0, 0, 0, time.Now().Location())
-	dateStart, _ := strconv.ParseFloat(monthStartDay.Format("20190102"), 10)
-	dateEnd, _ := strconv.ParseFloat(time.Now().Format("20190102"), 10)
+	dateStart, _ := strconv.ParseFloat(monthStartDay.Format("20060102"), 10)
+	dateEnd, _ := strconv.ParseFloat(time.Now().Format("20060102"), 10)
 	dayRevenues, _ := db.client.ZRangeWithScores("revenue:"+login, int64(dateStart), int64(dateEnd)).Result()
 	table := make(map[string]interface{})
 	for _, z := range dayRevenues {
@@ -208,13 +208,47 @@ func (db *database) putBlockHash(hash string) {
 	}
 }
 
-func (db *database) getAllBlockHashes() []string {
-	l, err := db.client.LRange("blocksFound", 0, -1).Result()
+func (db *database) getAllBlockHashesFrom(pos int64) []string {
+	l, err := db.client.LRange("blocksFound", pos, -1).Result()
 	if err != nil {
 		logger.Error(err)
 	}
 
 	return l
+}
+
+type MinedBlock struct {
+	Height uint64
+	Hash   string
+}
+
+func (db *database) putMinedBlock(height uint64, hash string) {
+	minedBlock := MinedBlock{
+		Height: height,
+		Hash:   hash,
+	}
+	raw, _ := json.Marshal(minedBlock)
+	_, err := db.client.LPush("blocksMined", raw).Result()
+	if err != nil {
+		logger.Error(err)
+	}
+}
+
+func (db *database) getAllMinedBlockHashes() []MinedBlock {
+	blocks := make([]MinedBlock, 0)
+
+	l, err := db.client.LRange("blocksMined", 0, -1).Result()
+	if err != nil {
+		logger.Error(err)
+	}
+
+	for i := range l {
+		var b MinedBlock
+		_ = json.Unmarshal([]byte(l[i]), &b)
+		blocks = append(blocks, b)
+	}
+
+	return blocks
 }
 
 func (db *database) calcRevenueToday(totalRevenue uint64) {

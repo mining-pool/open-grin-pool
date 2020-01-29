@@ -228,8 +228,6 @@ func initStratumServer(db *database, conf *config) {
 		conf: conf,
 	}
 
-	//go ss.backupPerInterval()
-
 	for {
 		conn, err := ln.AcceptTCP()
 		if err != nil {
