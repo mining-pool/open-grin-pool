@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/SimplistPool.iml" filepath="$PROJECT_DIR$/.idea/SimplistPool.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/open-grin-pool.iml" filepath="$PROJECT_DIR$/.idea/open-grin-pool.iml" />
     </modules>
   </component>
 </project>

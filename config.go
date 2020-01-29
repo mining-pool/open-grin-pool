@@ -40,10 +40,11 @@ type config struct {
 		BlockTime   int    `json:"block_time"`
 	} `json:"node"`
 	Wallet struct {
-		Address      string `json:"address"`
-		OwnerAPIPort int    `json:"owner_api_port"`
-		AuthUser     string `json:"auth_user"`
-		AuthPass     string `json:"auth_pass"`
+		Address         string `json:"address"`
+		OwnerAPIVersion string `json:"owner_api_version"`
+		OwnerAPIPort    int    `json:"owner_api_port"`
+		AuthUser        string `json:"auth_user"`
+		AuthPass        string `json:"auth_pass"`
 	} `json:"wallet"`
 	Payer struct {
 		Time string  `json:"time"`
