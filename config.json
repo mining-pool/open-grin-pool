@@ -1,8 +1,7 @@
 {
   "log": {
-    "verbose": true,
-    "system_log": false,
-    "log_file": "pool.log"
+    "level": "debug",
+    "file": "pool.log"
   },
   "stratum_server": {
     "address": "0.0.0.0",

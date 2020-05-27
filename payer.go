@@ -4,8 +4,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/google/logger"
 )
 
 type payer struct {
@@ -34,11 +32,11 @@ func (p *payer) watch() {
 		m := strings.Split(p.conf.Payer.Time, ":")
 		hour, err := strconv.Atoi(m[0])
 		if err != nil {
-			logger.Error(err)
+			log.Error(err)
 		}
 		min, err := strconv.Atoi(m[1])
 		if err != nil {
-			logger.Error(err)
+			log.Error(err)
 		}
 
 		var getNewBalance func() uint64

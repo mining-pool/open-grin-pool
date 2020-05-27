@@ -10,8 +10,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-
-	"github.com/google/logger"
 )
 
 type stratumServer struct {
@@ -50,7 +48,7 @@ func (ms *minerSession) handleMethod(res *stratumResponse, db *database) {
 	switch res.Method {
 	case "status":
 		if ms.login == "" {
-			logger.Warning("recv status detail before login")
+			log.Warning("recv status detail before login")
 			break
 		}
 		result, _ := res.Result.(map[string]interface{})
@@ -59,17 +57,17 @@ func (ms *minerSession) handleMethod(res *stratumResponse, db *database) {
 		break
 	case "submit":
 		if res.Error != nil {
-			logger.Warning(ms.login, "'s share has err: ", res.Error)
+			log.Warning(ms.login, "'s share has err: ", res.Error)
 			break
 		}
 		detail, ok := res.Result.(string)
-		logger.Info(ms.login, " has submit a ", detail, " share")
+		log.Info(ms.login, " has submit a ", detail, " share")
 		if ok {
 			db.putShare(ms.login, ms.agent, ms.difficulty)
 			if strings.Contains(detail, "block") {
 				blockHash := strings.Trim(detail, "block - ")
 				db.putBlockHash(blockHash)
-				logger.Warning("block ", blockHash, " has been found by ", ms.login)
+				log.Warning("block ", blockHash, " has been found by ", ms.login)
 			}
 		}
 		break
@@ -92,7 +90,7 @@ func callStatusPerInterval(ctx context.Context, nc *nodeClient) {
 		case <-ch:
 			err := enc.Encode(statusReq)
 			if err != nil {
-				logger.Error(err)
+				log.Error(err)
 			}
 		case <-ctx.Done():
 			return
@@ -101,7 +99,7 @@ func callStatusPerInterval(ctx context.Context, nc *nodeClient) {
 }
 
 func (ss *stratumServer) handleConn(conn net.Conn) {
-	logger.Info("new conn from ", conn.RemoteAddr())
+	log.Info("new conn from ", conn.RemoteAddr())
 	session := &minerSession{difficulty: int64(ss.conf.Node.Diff)}
 	defer conn.Close()
 	var login string
@@ -116,7 +114,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 		enc := json.NewEncoder(conn)
 		err := enc.Encode(sr)
 		if err != nil {
-			logger.Error(err)
+			log.Error(err)
 		}
 
 		// internal record
@@ -140,7 +138,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 					return
 				}
 			} else {
-				logger.Error(err)
+				log.Error(err)
 			}
 		}
 
@@ -150,11 +148,11 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 		err = json.Unmarshal(jsonRaw, &clientReq)
 		if err != nil {
-			// logger.Error(err)
+			// log.Error(err)
 			continue
 		}
 
-		logger.Info(conn.RemoteAddr(), " sends a ", clientReq.Method, " request:", string(jsonRaw))
+		log.Info(conn.RemoteAddr(), " sends a ", clientReq.Method, " request:", string(jsonRaw))
 
 		switch clientReq.Method {
 		case "login":
@@ -174,7 +172,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 			switch ss.db.verifyMiner(login, pass) {
 			case wrongPassword:
-				logger.Warning(login, " has failed to login")
+				log.Warning(login, " has failed to login")
 				login = ""
 				_, _ = conn.Write([]byte(`{  
    "id":"5",
@@ -188,7 +186,7 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 			case noPassword:
 				ss.db.registerMiner(login, pass, "")
-				logger.Info(login, " has registered in")
+				log.Info(login, " has registered in")
 
 			case correctPassword:
 
@@ -196,12 +194,12 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 			session.login = login
 			session.agent = agent
-			logger.Info(session.login, "'s ", agent, " has logged in")
+			log.Info(session.login, "'s ", agent, " has logged in")
 			_ = nc.enc.Encode(jsonRaw)
 
 		default:
 			if session.hasNotLoggedIn() {
-				logger.Warning(login, " has not logged in")
+				log.Warning(login, " has not logged in")
 			}
 
 			_ = nc.enc.Encode(jsonRaw)
@@ -217,10 +215,10 @@ func initStratumServer(db *database, conf *config) {
 	}
 	ln, err := net.ListenTCP("tcp", addr)
 	if err != nil {
-		logger.Fatal(err)
+		log.Fatal(err)
 	}
 
-	logger.Warning("listening on ", conf.StratumServer.Port)
+	log.Warning("listening on ", conf.StratumServer.Port)
 
 	ss := &stratumServer{
 		db:   db,
@@ -231,7 +229,7 @@ func initStratumServer(db *database, conf *config) {
 	for {
 		conn, err := ln.AcceptTCP()
 		if err != nil {
-			logger.Error(err)
+			log.Error(err)
 		}
 
 		go ss.handleConn(conn)

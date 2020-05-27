@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/google/logger"
 	"net/http"
 	"strconv"
 	"strings"
@@ -28,7 +27,7 @@ func (o *OwnerAPI) getNewBalanceV1() uint64 {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		logger.Error("failed to get balance from wallet, treat this as no income")
+		log.Error("failed to get balance from wallet, treat this as no income")
 		return 0
 	}
 
@@ -54,7 +53,7 @@ func (o *OwnerAPI) getNewBalanceV2() uint64 {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		logger.Error("failed to get balance from wallet for failing to post request, treat this as no income")
+		log.Error("failed to get balance from wallet for failing to post request, treat this as no income")
 		return 0
 	}
 
@@ -64,8 +63,8 @@ func (o *OwnerAPI) getNewBalanceV2() uint64 {
 
 	result := summaryInfo.Result
 	if result == nil {
-		logger.Error(summaryInfo.Error)
-		logger.Error("failed to get balance from wallet for failing to get result request, treat this as no income")
+		log.Error(summaryInfo.Error)
+		log.Error("failed to get balance from wallet for failing to get result request, treat this as no income")
 		return 0
 	}
 
@@ -87,6 +86,6 @@ func (o *OwnerAPI) getNewBalanceV2() uint64 {
 }
 
 func (o *OwnerAPI) getNewBalanceV3() uint64 {
-	logger.Fatal("V3 support WIP!")
+	log.Fatal("V3 support WIP!")
 	return 0
 }

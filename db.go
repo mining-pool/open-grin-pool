@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
-	"github.com/google/logger"
 )
 
 type database struct {
@@ -26,7 +25,7 @@ func initDB(config *config) *database {
 
 	_, err := rdb.Ping().Result()
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
 
 	return &database{rdb, config}
@@ -39,14 +38,14 @@ func (db *database) registerMiner(login, pass, payment string) {
 		"lastShare": 0,
 	}).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 }
 
 type minerLoginStatusCode int
 
 var (
-	correctPassword minerLoginStatusCode = 0
+	correctPassword minerLoginStatusCode // 0
 	noPassword      minerLoginStatusCode = 1
 	wrongPassword   minerLoginStatusCode = 2
 )
@@ -54,7 +53,7 @@ var (
 func (db *database) verifyMiner(login, pass string) minerLoginStatusCode {
 	passInDB, err := db.client.HGet("user:"+login, "pass").Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	if passInDB == "" || passInDB == "x" {
@@ -73,7 +72,7 @@ func (db *database) updatePayment(login, payment string) {
 		"payment": payment,
 	}).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 }
 
@@ -83,14 +82,14 @@ func (db *database) putShare(login, agent string, diff int64) {
 
 	_, err := db.client.HSet("user:"+login, "lastShare", time.Now().UnixNano()).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 }
 
 func (db *database) putDayShare(login string, diff int64) {
 	_, err := db.client.HIncrBy("shares", login, diff).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 }
 
@@ -101,14 +100,14 @@ func (db *database) putTmpShare(login, agent string, diff int64) {
 	}
 	_, err := db.client.ZAdd("tmp:"+login+":"+agent, z).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 }
 
 func (db *database) getShares() map[string]string {
 	shares, err := db.client.HGetAll("shares").Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	return shares
@@ -117,7 +116,7 @@ func (db *database) getShares() map[string]string {
 func (db *database) getMinerStatus(login string) map[string]interface{} {
 	m, err := db.client.HGetAll("user:" + login).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	rtn := make(map[string]interface{})
@@ -156,7 +155,7 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 func (db *database) setMinerAgentStatus(login, agent string, diff int64, status map[string]interface{}) {
 	s, err := db.client.HGet("user:"+login, "agents").Result()
 	if err != nil {
-		logger.Error("failed to get miner agent, redis answering", err, " maybe on initialization?")
+		log.Error("failed to get miner agent, redis answering", err, " maybe on initialization?")
 	}
 
 	strUnixNano, _ := db.client.HGet("user:"+login, "lastShare").Result()
@@ -173,7 +172,7 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 	db.client.ZRemRangeByScore("tmp:"+login+":"+agent, "-inf", fmt.Sprint("(", time.Now().UnixNano()-10*time.Minute.Nanoseconds()))
 	l, err := db.client.ZRangeWithScores("tmp:"+login+":"+agent, 0, -1).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	var sum int64
@@ -182,7 +181,7 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 		li := strings.Split(str, ":")
 		i, err := strconv.Atoi(li[0])
 		if err != nil {
-			logger.Error(err)
+			log.Error(err)
 		}
 		sum = sum + int64(i)
 	}
@@ -197,21 +196,21 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 	raw, _ := json.Marshal(agents)
 	_, err = db.client.HSet("user:"+login, "agents", raw).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 }
 
 func (db *database) putBlockHash(hash string) {
 	_, err := db.client.LPush("blocksFound", hash).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 }
 
 func (db *database) getAllBlockHashesFrom(pos int64) []string {
 	l, err := db.client.LRange("blocksFound", pos, -1).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	return l
@@ -230,7 +229,7 @@ func (db *database) putMinedBlock(height uint64, hash string) {
 	raw, _ := json.Marshal(minedBlock)
 	_, err := db.client.LPush("blocksMined", raw).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 }
 
@@ -239,7 +238,7 @@ func (db *database) getAllMinedBlockHashes() []MinedBlock {
 
 	l, err := db.client.LRange("blocksMined", 0, -1).Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	for i := range l {
@@ -254,14 +253,14 @@ func (db *database) getAllMinedBlockHashes() []MinedBlock {
 func (db *database) calcRevenueToday(totalRevenue uint64) {
 	allMinersStrSharesTable, err := db.client.HGetAll("shares").Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	newFileName := strconv.Itoa(time.Now().Year()) + "-" +
 		time.Now().Month().String() + "-" + strconv.Itoa(time.Now().Day())
 	f, err := os.Create(newFileName + ".csv")
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	var totalShare uint64
@@ -276,7 +275,7 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 	// clean the share
 	_, err = db.client.HDel("share").Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 	_, _ = fmt.Fprintf(f, "\n")
 
@@ -295,7 +294,7 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 		}
 		_, err := db.client.ZAdd("revenue:"+miner, z).Result()
 		if err != nil {
-			logger.Error(err)
+			log.Error(err)
 		}
 	}
 
@@ -307,7 +306,7 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 func (db *database) getLastDayRevenue() map[string]string {
 	allMinersRevenueTable, err := db.client.HGetAll("lastDayRevenue").Result()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	return allMinersRevenueTable

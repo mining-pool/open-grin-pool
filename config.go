@@ -3,15 +3,12 @@ package main
 import (
 	"encoding/json"
 	"os"
-
-	"github.com/google/logger"
 )
 
 type config struct {
 	Log struct {
-		Verbose   bool   `json:"verbose"`
-		SystemLog bool   `json:"system_log"`
-		LogFile   string `json:"log_file"`
+		Level string `json:"level"`
+		File  string `json:"file"`
 	} `json:"log"`
 	StratumServer struct {
 		Address        string `json:"address"`
@@ -55,14 +52,14 @@ type config struct {
 func parseConfig() *config {
 	f, err := os.Open("config.json")
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
 
 	var conf config
 	dec := json.NewDecoder(f)
 	err = dec.Decode(&conf)
 	if err != nil {
-		logger.Fatal(err)
+		panic(err)
 	}
 
 	return &conf

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/google/logger"
 	"net/http"
 	"strconv"
 	"time"
@@ -33,7 +32,7 @@ func (u *BlockUnlocker) checkMature(hash string) int64 {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	if res.StatusCode == 200 {
