@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/google/logger"
 	"github.com/gorilla/mux"
 )
 
@@ -52,7 +51,7 @@ func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 		return
 	}
 
@@ -66,7 +65,7 @@ func (as *apiServer) poolHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	raw, err := json.Marshal(table)
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 		return
 	}
 
@@ -92,13 +91,13 @@ func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		rawBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			logger.Error(err)
+			log.Error(err)
 			return
 		}
 		var form registerPaymentMethodForm
 		err = json.Unmarshal(rawBody, &form)
 		if err != nil {
-			logger.Error(err)
+			log.Error(err)
 			return
 		}
 
@@ -115,7 +114,7 @@ func (as *apiServer) minerHandler(w http.ResponseWriter, r *http.Request) {
 		m := as.db.getMinerStatus(login)
 		raw, err = json.Marshal(m)
 		if err != nil {
-			logger.Error(err)
+			log.Error(err)
 			return
 		}
 	}
@@ -133,7 +132,7 @@ func (as *apiServer) blocksHandler(w http.ResponseWriter, r *http.Request) {
 	blocks := as.db.getAllMinedBlockHashes()
 	raw, err := json.Marshal(blocks)
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 		return
 	}
 
@@ -153,6 +152,6 @@ func initAPIServer(db *database, conf *config) {
 	r.HandleFunc("/shares", as.sharesHandler)
 	r.HandleFunc("/blocks", as.blocksHandler)
 	http.Handle("/", r)
-	go logger.Fatal(
+	go log.Fatal(
 		http.ListenAndServe(conf.APIServer.Address+":"+strconv.Itoa(conf.APIServer.Port), nil))
 }

@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"net"
-
-	"github.com/google/logger"
 )
 
 type nodeClient struct {
@@ -24,7 +22,7 @@ func initNodeStratumClient(conf *config) *nodeClient {
 	}
 	conn, err := net.DialTCP("tcp4", nil, raddr)
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	enc := json.NewEncoder(conn)
@@ -50,7 +48,7 @@ func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json
 
 			err := nc.dec.Decode(&sr)
 			if err != nil {
-				logger.Error(err)
+				log.Error(err)
 				if err == io.EOF {
 					if nc.reconnect() != nil {
 						return
@@ -60,7 +58,7 @@ func (nc *nodeClient) registerHandler(ctx context.Context, callback func(sr json
 			}
 
 			resp, _ := sr.MarshalJSON()
-			logger.Info("Node returns a response: ", string(resp))
+			log.Infof("Node returns a response: %s", resp)
 
 			go callback(sr)
 		}
@@ -75,7 +73,7 @@ func (nc *nodeClient) reconnect() error {
 	}
 	conn, err := net.DialTCP("tcp4", nil, raddr)
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 		return err
 	}
 

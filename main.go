@@ -1,19 +1,28 @@
 package main
 
 import (
-	"os"
+	"fmt"
 
-	"github.com/google/logger"
+	logging "github.com/ipfs/go-log/v2"
 )
+
+var log = logging.Logger("pool")
 
 func main() {
 	var conf = parseConfig()
-	lf, err := os.OpenFile(conf.Log.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
+
+	lvl, err := logging.LevelFromString(conf.Log.Level)
 	if err != nil {
-		logger.Errorf("Failed to open log file: %v", err)
+		panic(err)
 	}
-	defer lf.Close()
-	defer logger.Init("pool", conf.Log.Verbose, conf.Log.SystemLog, lf).Close()
+	logging.SetAllLoggers(lvl) // (logCfg)
+
+	if len(conf.Log.File) > 0 {
+		fmt.Println("all log will write to", conf.Log.File)
+		logCfg := logging.Config{}
+		logCfg.File = conf.Log.File
+		logging.SetupLogging(logCfg)
+	}
 
 	db := initDB(conf)
 
