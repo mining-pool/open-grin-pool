@@ -1,7 +1,7 @@
 {
   "log": {
     "level": "debug",
-    "file": "pool.log"
+    "file": ""
   },
   "stratum_server": {
     "address": "0.0.0.0",
@@ -11,8 +11,8 @@
   "api_server": {
     "address": "0.0.0.0",
     "port": 3333,
-    "auth_user": "epic",
-    "auth_pass": "FoakPxzMy56Z4gJPCHKZ"
+    "auth_user": "grin",
+    "auth_pass": "xVbM1DS6MTPr3f5qwWCe"
   },
   "storage": {
     "address": "127.0.0.1",
@@ -22,19 +22,19 @@
   },
   "node": {
     "address": "127.0.0.1",
-    "api_port": 3413,
-    "stratum_port": 3416,
-    "auth_user": "epic",
-    "auth_pass": "FoakPxzMy56Z4gJPCHKZ",
+    "api_port": 23413,
+    "stratum_port": 23416,
+    "auth_user": "grin",
+    "auth_pass": "xVbM1DS6MTPr3f5qwWCe",
     "diff": 50000,
     "block_time": 60
   },
   "wallet": {
     "address": "127.0.0.1",
     "owner_api_version": "v1",
-    "owner_api_port": 3420,
-    "auth_user": "epic",
-    "auth_pass": "FoakPxzMy56Z4gJPCHKZ"
+    "owner_api_port": 23415,
+    "auth_user": "grin",
+    "auth_pass": "xVbM1DS6MTPr3f5qwWCe"
   },
   "payer": {
     "time": "23:59",

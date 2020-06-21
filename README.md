@@ -1,7 +1,10 @@
 # open-grin-pool
+
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmaoxs2%2Fopen-grin-pool?ref=badge_shield) [![Build Status](https://travis-ci.org/maoxs2/open-grin-pool.svg?branch=master)](https://travis-ci.org/maoxs2/open-grin-pool) [![Go Report Card](https://goreportcard.com/badge/github.com/maoxs2/open-grin-pool)](https://goreportcard.com/report/github.com/maoxs2/open-grin-pool)
 
 This is originally designed for the epic (=[epicash](http://epic.tech)). And the codebase of the epic is grin so it can be generally used as the grin pool.
+
+Latest is tested under grin's usernet.  
 
 ### features
 - relay the miner conn to the grin node, totally native experience

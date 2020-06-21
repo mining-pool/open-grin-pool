@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	logging "github.com/ipfs/go-log/v2"
 )
 
@@ -13,13 +15,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	logging.SetAllLoggers(lvl) // (logCfg)
 
-	logCfg := logging.Config{
-		Level: lvl,
-		File:  conf.Log.File,
+	if len(conf.Log.File) > 0 {
+		fmt.Println("all log will write to", conf.Log.File)
+		logCfg := logging.Config{}
+		logCfg.File = conf.Log.File
+		logging.SetupLogging(logCfg)
 	}
-
-	logging.SetupLogging(logCfg)
 
 	db := initDB(conf)
 
