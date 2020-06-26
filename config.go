@@ -26,6 +26,7 @@ type config struct {
 		Port     int    `json:"port"`
 		Db       int    `json:"db"`
 		Password string `json:"password"`
+		Prefix   string `json:"prefix"`
 	} `json:"storage"`
 	Node struct {
 		Address     string `json:"address"`

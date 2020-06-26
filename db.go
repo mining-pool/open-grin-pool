@@ -12,6 +12,8 @@ import (
 )
 
 type database struct {
+	prefix string
+
 	client *redis.Client
 	conf   *config
 }
@@ -28,11 +30,11 @@ func initDB(config *config) *database {
 		panic(err)
 	}
 
-	return &database{rdb, config}
+	return &database{config.Storage.Prefix + ":", rdb, config}
 }
 
 func (db *database) registerMiner(login, pass, payment string) {
-	_, err := db.client.HMSet("user:"+login, map[string]interface{}{
+	_, err := db.client.HMSet(db.prefix+"user:"+login, map[string]interface{}{
 		"pass":      pass,
 		"payment":   payment,
 		"lastShare": 0,
@@ -51,7 +53,7 @@ var (
 )
 
 func (db *database) verifyMiner(login, pass string) minerLoginStatusCode {
-	passInDB, err := db.client.HGet("user:"+login, "pass").Result()
+	passInDB, err := db.client.HGet(db.prefix+"user:"+login, "pass").Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -68,7 +70,7 @@ func (db *database) verifyMiner(login, pass string) minerLoginStatusCode {
 }
 
 func (db *database) updatePayment(login, payment string) {
-	_, err := db.client.HMSet("user:"+login, map[string]interface{}{
+	_, err := db.client.HMSet(db.prefix+"user:"+login, map[string]interface{}{
 		"payment": payment,
 	}).Result()
 	if err != nil {
@@ -80,14 +82,14 @@ func (db *database) putShare(login, agent string, diff int64) {
 	db.putDayShare(login, diff)
 	db.putTmpShare(login, agent, diff)
 
-	_, err := db.client.HSet("user:"+login, "lastShare", time.Now().UnixNano()).Result()
+	_, err := db.client.HSet(db.prefix+"user:"+login, "lastShare", time.Now().UnixNano()).Result()
 	if err != nil {
 		log.Error(err)
 	}
 }
 
 func (db *database) putDayShare(login string, diff int64) {
-	_, err := db.client.HIncrBy("shares", login, diff).Result()
+	_, err := db.client.HIncrBy(db.prefix+"shares", login, diff).Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -98,14 +100,14 @@ func (db *database) putTmpShare(login, agent string, diff int64) {
 		Score:  float64(time.Now().UnixNano()),
 		Member: strconv.FormatInt(diff, 10) + ":" + strconv.FormatInt(time.Now().UnixNano(), 16),
 	}
-	_, err := db.client.ZAdd("tmp:"+login+":"+agent, z).Result()
+	_, err := db.client.ZAdd(db.prefix+"tmp:"+login+":"+agent, z).Result()
 	if err != nil {
 		log.Error(err)
 	}
 }
 
 func (db *database) getShares() map[string]string {
-	shares, err := db.client.HGetAll("shares").Result()
+	shares, err := db.client.HGetAll(db.prefix + "shares").Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -114,7 +116,7 @@ func (db *database) getShares() map[string]string {
 }
 
 func (db *database) getMinerStatus(login string) map[string]interface{} {
-	m, err := db.client.HGetAll("user:" + login).Result()
+	m, err := db.client.HGetAll(db.prefix + "user:" + login).Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -134,7 +136,7 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 	monthStartDay := time.Date(time.Now().Year(), time.Now().Month(), 0, 0, 0, 0, 0, time.Now().Location())
 	dateStart, _ := strconv.ParseFloat(monthStartDay.Format("20060102"), 10)
 	dateEnd, _ := strconv.ParseFloat(time.Now().Format("20060102"), 10)
-	dayRevenues, _ := db.client.ZRangeWithScores("revenue:"+login, int64(dateStart), int64(dateEnd)).Result()
+	dayRevenues, _ := db.client.ZRangeWithScores(db.prefix+"revenue:"+login, int64(dateStart), int64(dateEnd)).Result()
 	table := make(map[string]interface{})
 	for _, z := range dayRevenues {
 		str, _ := z.Member.(string)
@@ -153,12 +155,12 @@ func (db *database) getMinerStatus(login string) map[string]interface{} {
 }
 
 func (db *database) setMinerAgentStatus(login, agent string, diff int64, status map[string]interface{}) {
-	s, err := db.client.HGet("user:"+login, "agents").Result()
+	s, err := db.client.HGet(db.prefix+"user:"+login, "agents").Result()
 	if err != nil {
 		log.Error("failed to get miner agent, redis answering", err, " maybe on initialization?")
 	}
 
-	strUnixNano, _ := db.client.HGet("user:"+login, "lastShare").Result()
+	strUnixNano, _ := db.client.HGet(db.prefix+"user:"+login, "lastShare").Result()
 	lastShareTime, _ := strconv.ParseInt(strUnixNano, 10, 64)
 	// H = D / ΔT
 	if time.Now().UnixNano() == lastShareTime {
@@ -169,8 +171,8 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 		status["realtime_hashrate"] = realtimeHashrate
 	}
 
-	db.client.ZRemRangeByScore("tmp:"+login+":"+agent, "-inf", fmt.Sprint("(", time.Now().UnixNano()-10*time.Minute.Nanoseconds()))
-	l, err := db.client.ZRangeWithScores("tmp:"+login+":"+agent, 0, -1).Result()
+	db.client.ZRemRangeByScore(db.prefix+"tmp:"+login+":"+agent, "-inf", fmt.Sprint("(", time.Now().UnixNano()-10*time.Minute.Nanoseconds()))
+	l, err := db.client.ZRangeWithScores(db.prefix+"tmp:"+login+":"+agent, 0, -1).Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -194,21 +196,21 @@ func (db *database) setMinerAgentStatus(login, agent string, diff int64, status 
 	agents[agent] = status
 
 	raw, _ := json.Marshal(agents)
-	_, err = db.client.HSet("user:"+login, "agents", raw).Result()
+	_, err = db.client.HSet(db.prefix+"user:"+login, "agents", raw).Result()
 	if err != nil {
 		log.Error(err)
 	}
 }
 
 func (db *database) putBlockHash(hash string) {
-	_, err := db.client.LPush("blocksFound", hash).Result()
+	_, err := db.client.LPush(db.prefix+"blocksFound", hash).Result()
 	if err != nil {
 		log.Error(err)
 	}
 }
 
 func (db *database) getAllBlockHashesFrom(pos int64) []string {
-	l, err := db.client.LRange("blocksFound", pos, -1).Result()
+	l, err := db.client.LRange(db.prefix+"blocksFound", pos, -1).Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -227,7 +229,7 @@ func (db *database) putMinedBlock(height uint64, hash string) {
 		Hash:   hash,
 	}
 	raw, _ := json.Marshal(minedBlock)
-	_, err := db.client.LPush("blocksMined", raw).Result()
+	_, err := db.client.LPush(db.prefix+"blocksMined", raw).Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -236,7 +238,7 @@ func (db *database) putMinedBlock(height uint64, hash string) {
 func (db *database) getAllMinedBlockHashes() []MinedBlock {
 	blocks := make([]MinedBlock, 0)
 
-	l, err := db.client.LRange("blocksMined", 0, -1).Result()
+	l, err := db.client.LRange(db.prefix+"blocksMined", 0, -1).Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -251,7 +253,7 @@ func (db *database) getAllMinedBlockHashes() []MinedBlock {
 }
 
 func (db *database) calcRevenueToday(totalRevenue uint64) {
-	allMinersStrSharesTable, err := db.client.HGetAll("shares").Result()
+	allMinersStrSharesTable, err := db.client.HGetAll(db.prefix + "shares").Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -273,7 +275,7 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 	}
 
 	// clean the share
-	_, err = db.client.HDel("share").Result()
+	_, err = db.client.HDel(db.prefix + "share").Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -284,7 +286,7 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 		revenue := shares / totalShare * totalRevenue
 		allMinersRevenueTable[miner] = revenue
 
-		payment, _ := db.client.HGet("user:"+miner, "payment").Result()
+		payment, _ := db.client.HGet(db.prefix+"user:"+miner, "payment").Result()
 		_, _ = fmt.Fprintf(f, "%s %d %s\n", miner, revenue, payment)
 
 		date, _ := strconv.ParseFloat(time.Now().Format("20190102"), 10)
@@ -292,19 +294,19 @@ func (db *database) calcRevenueToday(totalRevenue uint64) {
 			Score:  date,
 			Member: strconv.FormatUint(revenue, 10) + ":" + strconv.FormatInt(int64(date), 10),
 		}
-		_, err := db.client.ZAdd("revenue:"+miner, z).Result()
+		_, err := db.client.ZAdd(db.prefix+"revenue:"+miner, z).Result()
 		if err != nil {
 			log.Error(err)
 		}
 	}
 
-	db.client.HMSet("lastDayRevenue", allMinersRevenueTable)
+	db.client.HMSet(db.prefix+"lastDayRevenue", allMinersRevenueTable)
 
 	_ = f.Close()
 }
 
 func (db *database) getLastDayRevenue() map[string]string {
-	allMinersRevenueTable, err := db.client.HGetAll("lastDayRevenue").Result()
+	allMinersRevenueTable, err := db.client.HGetAll(db.prefix + "lastDayRevenue").Result()
 	if err != nil {
 		log.Error(err)
 	}

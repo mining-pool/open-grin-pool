@@ -2,52 +2,84 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="OPEN-GRIN-POOl">    
-	<title>OPEN-GRIN-POOl</title>    
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="OPEN-GRIN-POOl">
+	<title>OPEN-GRIN-POOl</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+		integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<link rel="stylesheet" href="css/main.css">
 </head>
+
 <body>
-
-<nav class="navbar navbar-dark fixed-top bg-dark">
-  	<a class="navbar-brand" href="https://github.com/maoxs2/open-grin-pool">OPEN-GRIN-POOl</a>
-	<form class="form-inline">
-    <div class="input-group">
-		<input class="form-control" type="text" id="login" placeholder="Your Miner Login Name" aria-label="Miner Login">
-    		<div class="input-group-append">
-            	<button class="btn btn-outline-success" value="GO" id="button">GO</button>
+	<nav class="navbar navbar-dark fixed-top bg-dark">
+		<a class="navbar-brand" href="https://github.com/maoxs2/open-grin-pool">OPEN-GRIN-POOl</a>
+		<form class="form-inline">
+			<div class="input-group">
+				<input class="form-control" type="text" id="login" placeholder="Your Miner Login Name"
+					aria-label="Miner Login">
+				<div class="input-group-append">
+					<a class="btn btn-outline-success" value="GO" id="button">GO</a>
+				</div>
 			</div>
-    </div>
-    </form>  
-</nav>
+		</form>
+	</nav>
 
-<div class="container">
-    <h2>Pool Status</h2>
-	<div class="row">
-    	<div class="col-sm l-box text-center"><div class="infobox"><h4>Connected Peers</h4><p id="conn"></p></div></div>
-       	<div class="col-sm l-box text-center"><div class="infobox"><h4>Height</h4><p id="height"></p></div></div>
-       	<div class="col-sm l-box text-center"><div class="infobox"><h4>Blocks Found</h4><p id="count"></p></div></div>
-	</div>
-	<div class="row">
-       	<div class="col-sm l-box text-center"><div class="infobox"><h4>Cuckatoo</h4><p id="cuckatoo"></p></div></div>
-       	<div class="col-sm l-box text-center"><div class="infobox"><h4>ProgPow</h4><p id="progpow"></p></div></div>
-       	<div class="col-sm l-box text-center"><div class="infobox"><h4>RandomX</h4><p id="randomx"></p></div></div>
-    </div>
-	<h2>Blocks Mined by Pool</h2>
-    <div class="row">
-		<div class="col-sm l-box">		
-			<div class="infobox list">
-			<ul class="list-group" id="blocks"></ul>
-       		</div>
+	<div class="container">
+		<h2>Pool Status</h2>
+		<div class="row">
+			<div class="col-sm l-box text-center">
+				<div class="infobox">
+					<h4>Connected Peers</h4>
+					<p id="conn"></p>
+				</div>
+			</div>
+			<div class="col-sm l-box text-center">
+				<div class="infobox">
+					<h4>Height</h4>
+					<p id="height"></p>
+				</div>
+			</div>
+			<div class="col-sm l-box text-center">
+				<div class="infobox">
+					<h4>Blocks Found</h4>
+					<p id="count"></p>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm l-box text-center">
+				<div class="infobox">
+					<h4>Cuckatoo</h4>
+					<p id="cuckatoo"></p>
+				</div>
+			</div>
+			<div class="col-sm l-box text-center">
+				<div class="infobox">
+					<h4>ProgPow</h4>
+					<p id="progpow"></p>
+				</div>
+			</div>
+			<div class="col-sm l-box text-center">
+				<div class="infobox">
+					<h4>RandomX</h4>
+					<p id="randomx"></p>
+				</div>
+			</div>
+		</div>
+		<h2>Blocks Mined by Pool</h2>
+		<div class="row">
+			<div class="col-sm l-box">
+				<div class="infobox list">
+					<ul class="list-group" id="blocks"></ul>
+				</div>
+			</div>
 		</div>
 	</div>
-</div>
 
 
-<script src="/js/config.js"></script>
-<script src="/js/index.js"></script>
+	<script src="/js/config.js"></script>
+	<script src="/js/index.js"></script>
 </body>
 
 </html>
