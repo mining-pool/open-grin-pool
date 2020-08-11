@@ -17,7 +17,6 @@ function get_pool_status() {
        
             document.getElementById("conn").innerText = pool.node_status.connections;
             document.getElementById("height").innerText = pool.node_status.tip.height;
-            document.getElementById("count").innerText = pool.mined_blocks.length;
             document.getElementById("cuckatoo").innerText = pool.node_status.tip.total_difficulty.cuckatoo;
             document.getElementById("progpow").innerText = pool.node_status.tip.total_difficulty.progpow;
             document.getElementById("randomx").innerText = pool.node_status.tip.total_difficulty.randomx;
@@ -38,7 +37,8 @@ function get_blocks() {
         let status = xhr.status;
         if (status === 200) {
             let blocks = xhr.response;
-    
+
+	     document.getElementById("count").innerText = blocks.length;
             let divBlocks = document.getElementById("blocks");
             for (i = 0; i < blocks.length; i++) {
                 let node = document.createElement("li");
