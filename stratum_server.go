@@ -108,8 +108,6 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go callStatusPerInterval(ctx, nc)
-
 	go nc.registerHandler(ctx, func(sr json.RawMessage) {
 		enc := json.NewEncoder(conn)
 		err := enc.Encode(sr)
@@ -194,6 +192,18 @@ func (ss *stratumServer) handleConn(conn net.Conn) {
 
 			session.login = login
 			session.agent = agent
+
+			requireCallStatus := true
+			for _, omitSubstr := range ss.conf.StratumServer.OmitAgentStatus {
+				if strings.Contains(agent, omitSubstr) {
+					requireCallStatus = false
+					break
+				}
+			}
+			if requireCallStatus {
+				go callStatusPerInterval(ctx, nc)
+			}
+
 			log.Info(session.login, "'s ", agent, " has logged in")
 			_ = nc.enc.Encode(jsonRaw)
 

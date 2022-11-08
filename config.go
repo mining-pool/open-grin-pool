@@ -11,9 +11,10 @@ type config struct {
 		File  string `json:"file"`
 	} `json:"log"`
 	StratumServer struct {
-		Address        string `json:"address"`
-		Port           int    `json:"port"`
-		BackupInterval string `json:"backup_interval"`
+		Address         string   `json:"address"`
+		Port            int      `json:"port"`
+		BackupInterval  string   `json:"backup_interval"`
+		OmitAgentStatus []string `json:"omit_agent_status"`
 	} `json:"stratum_server"`
 	APIServer struct {
 		Address  string `json:"address"`

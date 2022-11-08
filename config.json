@@ -6,7 +6,8 @@
   "stratum_server": {
     "address": "0.0.0.0",
     "port": 3344,
-    "backup_interval": "6h"
+    "backup_interval": "6h",
+    "omit_agent_status": ["SRB"] 
   },
   "api_server": {
     "address": "0.0.0.0",
